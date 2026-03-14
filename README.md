@@ -68,6 +68,7 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 ## Estrutura do Projeto
 
 /frontend
+
 /backend
 
 ## Contribuidores
