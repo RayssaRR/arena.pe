@@ -1,39 +1,27 @@
-# Sistema de Adoção de Animais
+# Arena.PE
 
-Aplicação Full Stack para gerenciamento de adoção de animais, desenvolvida com React no frontend e Java com Spring Boot no backend.
+Aplicação Full Stack para gerenciamento, divulgação e análise de eventos realizados na Arena Pernambuco, conectando cidadãos, organizadores e administradores por meio de uma plataforma web moderna.
 
 ## Sobre o Projeto
 
-O Sistema de Adoção de Animais é uma aplicação web que tem como objetivo facilitar o processo de adoção de pets, permitindo o cadastro e gerenciamento de animais, além do envio e acompanhamento de solicitações de adoção por parte dos usuários.
+O Arena.PE é uma aplicação web que tem como objetivo aumentar a utilização da Arena Pernambuco, facilitando a divulgação de eventos, a participação da população e a gestão administrativa do espaço.
 
-A aplicação é dividida em duas camadas principais:
-
-Frontend: Interface desenvolvida em React
-
-Backend: API REST desenvolvida em Java com Spring Boot
-
+A plataforma permite que cidadãos descubram eventos, reservem ingressos e agendem visitas, enquanto organizadores e administradores podem cadastrar eventos, acompanhar estatísticas e gerenciar o uso da infraestrutura.
 
 ## Tecnologias Utilizadas
 ### Backend
 
 - Java 25
-
 - Spring Boot
-
 - Spring Data JPA
-
 - Hibernate
-
 - API REST
-
 - Maven
 
 ### Frontend
 
 - React 18+
-
 - TypeScript
-
 - Tailwind
 
 ### Banco de Dados
@@ -45,11 +33,8 @@ Backend: API REST desenvolvida em Java com Spring Boot
 O backend segue o padrão de arquitetura em camadas:
 
 - Controller
-
 - Service
-
 - Repository
-
 - Model
 
 ### Fluxo interno da aplicação:
@@ -59,37 +44,30 @@ Controller → Service → Repository → Database
 A comunicação entre frontend e backend ocorre por meio de requisições HTTP utilizando JSON.
 
 ## Funcionalidades
-### Usuários
+### Autenticação
 
-- Cadastro de usuário
+- Cadastro de usuários
+- Controle de perfis de acesso
+- Gerenciamento de usuários pelo administrador
 
-- Autenticação
+### Eventos
 
-- Visualização de animais disponíveis
+- Cadastro de eventos
+- Edição de eventos
+- Cancelamento de eventos
+- Visualização pública da programação
+- Filtros por categoria, data e status
+- Ordenação por data ou popularidade
 
-- Envio de solicitação de adoção
+### Ingressos
 
-- Acompanhamento do status da solicitação
-
-### Animais
-
-- Cadastro de animais
-
-- Atualização de informações
-
-- Alteração de status (Disponível, Em Processo, Adotado)
-
-### Administração
-
-- Gerenciamento de usuários
-
-- Aprovação ou recusa de solicitações
-
-- Controle geral do sistema
+- Reserva simulada de ingressos
+- Controle de capacidade dos eventos
+- Visualização e cancelamento de reservas
 
 ## Estrutura do Projeto
-/frontend
 
+/frontend
 /backend
 
 ## Contribuidores
