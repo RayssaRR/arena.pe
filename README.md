@@ -59,7 +59,7 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 - Filtros por categoria, data e status
 - Ordenação por data ou popularidade
 
-### Ingressos
+###  Ingressos
 
 - Reserva simulada de ingressos
 - Controle de capacidade dos eventos
