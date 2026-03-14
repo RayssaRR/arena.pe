@@ -74,7 +74,7 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 ## Entregas
 ### Entrega 1
 
-- https://docs.google.com/document/d/1xkyBUIlEBqiuUwNKGcrFDna4Z5a3j3zyPY98hnlMEkU/edit?tab=t.0#heading=h.o4dna26bryia
+- [Histórias de Usuário](https://docs.google.com/document/d/1xkyBUIlEBqiuUwNKGcrFDna4Z5a3j3zyPY98hnlMEkU/edit?tab=t.0#heading=h.o4dna26bryia)
 
 ## Contribuidores
 
