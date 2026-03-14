@@ -94,14 +94,9 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 
 ## Contribuidores
 
-- [emanoelhenrick](https://github.com/emanoelhenrick)
-
-- [FelipeLV12](https://github.com/FelipeLV12)
-
-- [injuje](https://github.com/injuje)
-
-- [jenniferzeferino](https://github.com/jenniferzeferino)
-
-- [RaieleLeite](https://github.com/RaieleLeite)
-
-- [RayssaRR](https://github.com/RayssaRR)
+- Emanoel Henrick Alves da Silva - [emanoelhenrick](https://github.com/emanoelhenrick)
+- Felipe Lopes Vasconcelos - [FelipeLV12](https://github.com/FelipeLV12)
+- Jennifer Zeferino Cruz de Lima - [injuje](https://github.com/injuje)
+- José Leandro Ventura Rocha da Silva - [jenniferzeferino](https://github.com/jenniferzeferino)
+- Raiele Leite da Silva - [RaieleLeite](https://github.com/RaieleLeite)
+- Rayssa Santana Ribeiro - [RayssaRR](https://github.com/RayssaRR)
