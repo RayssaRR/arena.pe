@@ -71,6 +71,11 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 
 /backend
 
+## Entregas
+### Entrega 1
+
+- https://docs.google.com/document/d/1xkyBUIlEBqiuUwNKGcrFDna4Z5a3j3zyPY98hnlMEkU/edit?tab=t.0#heading=h.o4dna26bryia
+
 ## Contribuidores
 
 - Emanoel Henrick Alves da Silva - [emanoelhenrick](https://github.com/emanoelhenrick)
