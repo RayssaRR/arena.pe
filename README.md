@@ -65,12 +65,6 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 - Controle de capacidade dos eventos
 - Visualização e cancelamento de reservas
 
-## Estrutura do Projeto
-
-/frontend
-
-/backend
-
 ## Entregas
 ### Entrega 1
 
