@@ -1,4 +1,4 @@
-package com.ffqts.adoteme.shared.base;
+package com.ffqts.arenape.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

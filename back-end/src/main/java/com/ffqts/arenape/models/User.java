@@ -1,6 +1,5 @@
-package com.ffqts.adoteme.user.entity;
+package com.ffqts.arenape.models;
 
-import com.ffqts.adoteme.shared.base.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

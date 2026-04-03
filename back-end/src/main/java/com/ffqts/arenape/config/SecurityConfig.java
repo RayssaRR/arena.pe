@@ -1,4 +1,4 @@
-package com.ffqts.adoteme.config;
+package com.ffqts.arenape.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

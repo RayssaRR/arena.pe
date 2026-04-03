@@ -1,4 +1,4 @@
-package com.ffqts.adoteme.user.dto;
+package com.ffqts.arenape.controllers.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

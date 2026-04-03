@@ -1,6 +1,6 @@
-package com.ffqts.adoteme.user.repository;
+package com.ffqts.arenape.repositories;
 
-import com.ffqts.adoteme.user.entity.User;
+import com.ffqts.arenape.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

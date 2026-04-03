@@ -1,4 +1,4 @@
-package com.ffqts.adoteme.user.dto;
+package com.ffqts.arenape.controllers.dto;
 
 public class LoginResponse {
     private String token;

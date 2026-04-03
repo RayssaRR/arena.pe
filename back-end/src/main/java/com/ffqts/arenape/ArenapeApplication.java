@@ -1,13 +1,13 @@
-package com.ffqts.adoteme;
+package com.ffqts.arenape;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AdotemeApplication {
+public class ArenapeApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(AdotemeApplication.class, args);
+		SpringApplication.run(ArenapeApplication.class, args);
 	}
 
 }

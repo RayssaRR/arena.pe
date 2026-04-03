@@ -1,7 +1,7 @@
-package com.ffqts.adoteme.user.service;
+package com.ffqts.arenape.services;
 
-import com.ffqts.adoteme.user.entity.User;
-import com.ffqts.adoteme.user.repository.UserRepository;
+import com.ffqts.arenape.models.User;
+import com.ffqts.arenape.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

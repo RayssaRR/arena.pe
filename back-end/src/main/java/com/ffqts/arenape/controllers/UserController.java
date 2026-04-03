@@ -1,10 +1,10 @@
-package com.ffqts.adoteme.user.controller;
+package com.ffqts.arenape.controllers;
 
-import com.ffqts.adoteme.user.dto.LoginRequest;
-import com.ffqts.adoteme.user.dto.LoginResponse;
-import com.ffqts.adoteme.user.entity.User;
-import com.ffqts.adoteme.user.service.UserService;
-import com.ffqts.adoteme.config.JwtUtil;
+import com.ffqts.arenape.controllers.dto.LoginRequest;
+import com.ffqts.arenape.controllers.dto.LoginResponse;
+import com.ffqts.arenape.models.User;
+import com.ffqts.arenape.services.UserService;
+import com.ffqts.arenape.config.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;

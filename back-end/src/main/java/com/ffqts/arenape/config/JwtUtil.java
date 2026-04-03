@@ -1,4 +1,4 @@
-package com.ffqts.adoteme.config;
+package com.ffqts.arenape.config;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

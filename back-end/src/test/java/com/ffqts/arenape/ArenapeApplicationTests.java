@@ -1,10 +1,10 @@
-package com.ffqts.adoteme;
+package com.ffqts.arenape;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AdotemeApplicationTests {
+class ArenapeApplicationTests {
 
 	@Test
 	void contextLoads() {
