@@ -3,6 +3,7 @@ package com.ffqts.arenape.config;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
@@ -22,7 +23,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public static String getEmailFromToken(String token) {
+    public static String validate(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(SECRET_KEY)
                 .build()

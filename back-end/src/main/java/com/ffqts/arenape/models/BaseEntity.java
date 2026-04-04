@@ -14,6 +14,7 @@ public abstract class BaseEntity {
     @PrePersist//vai ser exeutado automaticamente antes do objeto ser salvo automaticamente no banco
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate//ajusta a data da última modificação

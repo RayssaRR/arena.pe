@@ -3,14 +3,31 @@ package com.ffqts.arenape.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
-public class User extends BaseEntity {
+@Table(name = "users")
+public class User implements UserDetails {
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(this.role.toString()));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @NotBlank(message = "Nome não pode ficar vazio")
     @Column(nullable = false)
@@ -27,12 +44,12 @@ public class User extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role = Role.CITIZEN;
+    private RoleEnum role;
 
-    public enum Role { CITIZEN, ORGANIZER, ADMIN }
+    @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Event> organizedEvents;
 
-
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
     public String getName() {
@@ -53,10 +70,12 @@ public class User extends BaseEntity {
     public void setPassword(String password) {
         this.password = password;
     }
-    public Role getRole() {
+    public RoleEnum getRole() {
         return role;
     }
-    public void setRole(Role role) {
+    public void setRole(RoleEnum role) {
         this.role = role;
     }
+    public List<Event> getOrganizedEvents() { return organizedEvents; }
+    public void setOrganizedEvents(List<Event> organizedEvents) { this.organizedEvents = organizedEvents; }
 }
