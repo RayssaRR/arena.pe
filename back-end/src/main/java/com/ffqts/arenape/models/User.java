@@ -13,16 +13,15 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-public class User implements UserDetails {
+public class User extends BaseEntity implements UserDetails {
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.role.toString()));
-    }
+    public User() {}
 
-    @Override
-    public String getUsername() {
-        return this.email;
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = RoleEnum.CUSTOMER;
     }
 
     @Id
@@ -46,8 +45,18 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private RoleEnum role;
 
-    @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Event> organizedEvents;
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Event> createdEvents;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(this.role.toString()));
+    }
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
 
     public UUID getId() {
         return id;
@@ -73,9 +82,7 @@ public class User implements UserDetails {
     public RoleEnum getRole() {
         return role;
     }
-    public void setRole(RoleEnum role) {
-        this.role = role;
-    }
-    public List<Event> getOrganizedEvents() { return organizedEvents; }
-    public void setOrganizedEvents(List<Event> organizedEvents) { this.organizedEvents = organizedEvents; }
+    public void setRole(RoleEnum role) { this.role = role; }
+    public List<Event> getCreatedEvents() { return createdEvents; }
+    public void setCreatedEvents(List<Event> createdEvents) { this.createdEvents = createdEvents; }
 }

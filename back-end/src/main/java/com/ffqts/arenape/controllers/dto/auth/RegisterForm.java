@@ -14,9 +14,6 @@ public record RegisterForm(
   String email,
 
   @NotBlank(message = "Senha não pode ficar em branco")
-  String password,
-
-  @NotNull(message = "Role é obrigatória")
-  RoleEnum role
+  String password
 ) {
 }

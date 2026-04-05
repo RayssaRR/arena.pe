@@ -25,7 +25,7 @@ public class Event extends BaseEntity {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    private User organizer;
+    private User creator;
 
     @ManyToOne
     @Nullable
@@ -39,7 +39,7 @@ public class Event extends BaseEntity {
         String description,
         LocalDateTime eventDate,
         Integer capacity,
-        User organizer
+        User creator
 //        Category category
     ) {
         this.title = title;
@@ -48,7 +48,7 @@ public class Event extends BaseEntity {
         this.capacity = capacity;
         this.ticketsSold = 0;
         this.status = EventStatus.UPCOMING;
-        this.organizer = organizer;
+        this.creator = creator;
 //        this.category = category;
     }
 
@@ -116,12 +116,8 @@ public class Event extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
-    public User getOrganizer() {
-        return organizer;
-    }
-
-    public void setOrganizer(User organizer) {
-        this.organizer = organizer;
+    public User getCreator() {
+        return creator;
     }
 
     public Category getCategory() {

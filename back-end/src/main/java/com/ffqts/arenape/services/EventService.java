@@ -27,15 +27,15 @@ public class EventService {
         return eventRepository.findAll();
     }
 
-    public Event createEvent(NewEventForm newEventForm, String userEmail) {
+    public Event createEvent(NewEventForm newEventForm, String creatorEmail) {
         if (eventRepository.findByTitle(newEventForm.title()).isPresent()) {
             throw new IllegalArgumentException("Evento com esse título já existe");
         }
 
-        User organizer = userRepository.findUserByEmail(userEmail)
+        User creator = userRepository.findUserByEmail(creatorEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Organizador não encontrado"));
 
-        if (organizer.getRole() == RoleEnum.CUSTOMER ) {
+        if (creator.getRole() == RoleEnum.CUSTOMER ) {
             throw new IllegalArgumentException("Usuário não tem permissão para criar eventos");
         }
 
@@ -47,7 +47,7 @@ public class EventService {
             newEventForm.description(),
             newEventForm.eventDate(),
             newEventForm.capacity(),
-            organizer
+            creator
         );
 
         return eventRepository.save(newEvent);

@@ -15,7 +15,7 @@ public class Category {
   Long id;
 
   @NotBlank
-  String name;
+  String title;
 
   @Nullable
   String description;
