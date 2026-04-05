@@ -27,6 +27,17 @@ public class EventController {
         return ResponseEntity.status(201).body(createdEvent);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Event> updateEventById(
+        @PathVariable String id,
+        @RequestBody NewEventForm updatedEventForm,
+        HttpServletRequest req
+    ) {
+        var email = getEmailFromTokenRequest(req);
+        var updatedEvent = eventService.updateEvent(updatedEventForm, id, email);
+        return ResponseEntity.ok(updatedEvent);
+    }
+
     @GetMapping
     public List<Event> getAllEvents() {
         return eventService.getAllEvents();

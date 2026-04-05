@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class EventService {
@@ -32,12 +33,7 @@ public class EventService {
             throw new IllegalArgumentException("Evento com esse título já existe");
         }
 
-        User creator = userRepository.findUserByEmail(creatorEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Organizador não encontrado"));
-
-        if (creator.getRole() == RoleEnum.CUSTOMER ) {
-            throw new IllegalArgumentException("Usuário não tem permissão para criar eventos");
-        }
+        var creator = verifyRole(creatorEmail);
 
 //        Category category = categoryRepository.findById(newEventForm.categoryId())
 //                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
@@ -53,12 +49,34 @@ public class EventService {
         return eventRepository.save(newEvent);
     }
 
-    Event updateEvent() {
-        // Lógica para atualizar um evento
-        return new Event();
+    public Event updateEvent(NewEventForm updatedEvent, String eventId, String creatorEmail) {
+        verifyRole(creatorEmail);
+        var currentEvent = eventRepository.findById(UUID.fromString(eventId)).orElseThrow();
+        updateEventData(updatedEvent, currentEvent);
+        return currentEvent;
     }
 
     void deleteEvent() {
         // Lógica para deletar um evento
+    }
+
+    private User verifyRole(String userEmail) {
+        var creator = userRepository.findUserByEmail(userEmail)
+            .orElseThrow(() -> new IllegalArgumentException("Organizador não encontrado"));
+
+        if (creator.getRole() == RoleEnum.CUSTOMER ) {
+            throw new IllegalArgumentException("Usuário não tem permissão para gerenciar eventos");
+        }
+
+        return creator;
+    }
+
+    private void updateEventData(NewEventForm updatedEvent, Event currentEvent) {
+        currentEvent.setTitle(updatedEvent.title());
+        currentEvent.setDescription(updatedEvent.description());
+        currentEvent.setEventDate(updatedEvent.eventDate());
+        currentEvent.setCapacity(updatedEvent.capacity());
+        currentEvent.setStatus(updatedEvent.status());
+        currentEvent.setImageUrl(updatedEvent.imageUrl());
     }
 }
