@@ -26,8 +26,8 @@ public class AuthService {
 
     @Transactional
     public User register(RegisterForm registerForm) {
-        var isUser = userRepository.findUserByEmail(registerForm.email()).isPresent();
-        if (isUser) { throw new IllegalArgumentException("Email já registrado"); }
+        var userExists = userRepository.findUserByEmail(registerForm.email()).isPresent();
+        if (userExists) { throw new IllegalArgumentException("Email já registrado"); }
 
         var encodedPassword = passwordEncoder.encode(registerForm.password());
         var newUser = new User(registerForm.name(), registerForm.email(), encodedPassword);
