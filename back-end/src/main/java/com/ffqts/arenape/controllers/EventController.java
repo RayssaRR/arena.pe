@@ -38,6 +38,13 @@ public class EventController {
         return ResponseEntity.ok(updatedEvent);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEventById(@PathVariable String id, HttpServletRequest req) {
+        var email = getEmailFromTokenRequest(req);
+        eventService.deleteEvent(id, email);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping
     public List<Event> getAllEvents() {
         return eventService.getAllEvents();

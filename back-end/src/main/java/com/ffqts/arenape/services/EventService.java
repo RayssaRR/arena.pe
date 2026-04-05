@@ -57,8 +57,11 @@ public class EventService {
         return currentEvent;
     }
 
-    void deleteEvent() {
-        // Lógica para deletar um evento
+    public void deleteEvent(String eventId, String creatorEmail) {
+        verifyRole(creatorEmail);
+        var event = eventRepository.findById(UUID.fromString(eventId))
+            .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
+        eventRepository.delete(event);
     }
 
     private User verifyRole(String userEmail) {
