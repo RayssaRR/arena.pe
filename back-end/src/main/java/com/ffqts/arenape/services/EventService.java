@@ -43,7 +43,8 @@ public class EventService {
             newEventForm.description(),
             newEventForm.eventDate(),
             newEventForm.capacity(),
-            creator
+            creator,
+            newEventForm.imageUrl()
         );
 
         return eventRepository.save(newEvent);

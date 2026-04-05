@@ -39,7 +39,8 @@ public class Event extends BaseEntity {
         String description,
         LocalDateTime eventDate,
         Integer capacity,
-        User creator
+        User creator,
+        String imageUrl
 //        Category category
     ) {
         this.title = title;
@@ -49,6 +50,7 @@ public class Event extends BaseEntity {
         this.ticketsSold = 0;
         this.status = EventStatus.UPCOMING;
         this.creator = creator;
+        this.imageUrl = imageUrl;
 //        this.category = category;
     }
 
