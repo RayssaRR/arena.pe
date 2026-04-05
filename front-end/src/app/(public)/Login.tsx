@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function Login() {
+  const buttonStyle = "flex-1 bg-white/0 border-2 border-gray-300 text-gray-500 cursor-pointer"
   return (
     <form className="flex flex-col space-y-4">
       
@@ -29,7 +30,7 @@ export default function Login() {
       </div>
 
       <div className="flex items-center justify-between">
-        
+        {/* Lembrar a senha */}
         <div className="flex items-center space-x-2">
           <Input id="remember" type="checkbox" className="w-fit" />
           <Label htmlFor="remember" className="text-sm">Lembrar senha</Label>
@@ -43,12 +44,15 @@ export default function Login() {
         </a>
 
       </div>
-      <Button className="bg-blue-600 py-4">Entrar</Button>
+
+      {/* Entrar */}
+      <Button className="bg-blue-600 py-4 cursor-pointer">Entrar</Button>
       <p className="self-center text-gray-500">Ou continue com</p>
 
+      {/* Google e Facebook */}
       <div className="flex gap-5">
-        <Button className="flex-1 bg-white/0 border-2 border-gray-300 text-gray-500 cursor-pointer">Google</Button>
-        <Button className="flex-1 bg-white/0 border-2 border-gray-300 text-gray-500 cursor-pointer">Facebook</Button>
+        <Button className={buttonStyle}>Google</Button>
+        <Button className={buttonStyle}>Facebook</Button>
       </div>
     </form>
   );

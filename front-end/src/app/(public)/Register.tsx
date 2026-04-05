@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function Register() {
+  const buttonStyle = "flex-1 bg-white/0 border-2 border-gray-300 text-gray-500 cursor-pointer"
   return (
     <form className="flex flex-col space-y-4">
       
@@ -39,13 +40,14 @@ export default function Register() {
         />
       </div>
 
-      
-      <Button className="bg-blue-600 py-4">Criar uma conta</Button>
+      {/* Criar conta */}
+      <Button className="bg-blue-600 py-4 cursor-pointer">Criar uma conta</Button>
       <p className="self-center text-gray-500">Ou continue com</p>
 
+      {/* Google e Facebook */}
       <div className="flex gap-5">
-        <Button className="flex-1 bg-white/0 border-2 border-gray-300 text-gray-500 cursor-pointer">Google</Button>
-        <Button className="flex-1 bg-white/0 border-2 border-gray-300 text-gray-500 cursor-pointer">Facebook</Button>
+        <Button className={buttonStyle}>Google</Button>
+        <Button className={buttonStyle}>Facebook</Button>
       </div>
     </form>
   );

@@ -4,6 +4,7 @@ import LastEventCard from "./components/LastEventCard";
 export default function MyEvents(){
     return(
         <main className="p-8 min-h-screen">
+          {/* Header */}
         <header className="space-y-1">
           <h1 className="title-h1">
             Bem vido de volta, Emanoel !
@@ -13,6 +14,7 @@ export default function MyEvents(){
           </p>
         </header>
 
+        {/* Próximos eventos */}
         <section>
             <h3 className="title-h3">Próximos Eventos</h3>
             <div className="grid grid-cols-2 gap-8">
@@ -21,6 +23,7 @@ export default function MyEvents(){
             </div>
         </section>
 
+        {/* Últimos eventos */}
         <section>
           <h3 className="title-h3">Últimos Eventos</h3>
           <LastEventCard/>

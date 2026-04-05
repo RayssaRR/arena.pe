@@ -41,10 +41,10 @@ export default function NextEventCard() {
 
       {/* Footer */}
       <CardFooter className="flex justify-end gap-5 bg-white p-5">
-        <Button className="bg-red-600 hover:bg-red-700">
+        <Button className="bg-red-600 hover:bg-red-700 cursor-pointer">
           Cancelar
         </Button>
-        <Button className="bg-blue-600 hover:bg-blue-700">
+        <Button className="bg-blue-600 hover:bg-blue-700 cursor-pointer">
           Obter ingresso
         </Button>
       </CardFooter>
