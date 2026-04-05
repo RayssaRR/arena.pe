@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getJsonWithAuth } from "@/lib/api";
+import { getJsonWithAuth, resolvePublicAssetUrl } from "@/lib/api";
 
 type EventItem = {
   id?: string | number;
@@ -138,32 +137,37 @@ export default function EventosPage() {
 
         {!isLoading && !errorMessage && events.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {events.map((event, index) => (
-              <Card key={event.id ?? `${event.title ?? "evento"}-${index}`}>
-                {event.imageUrl ? (
-                  <Image
-                    src={event.imageUrl}
-                    alt={event.title ?? "Imagem do evento"}
-                    className="h-44 w-full object-cover"
-                    width={720}
-                    height={176}
-                  />
-                ) : null}
+            {events.map((event, index) => {
+              const imageSrc = resolvePublicAssetUrl(event.imageUrl);
 
-                <CardHeader className="space-y-1">
-                  <CardTitle>{event.title ?? "Sem titulo"}</CardTitle>
-                  <CardDescription>{event.status ?? "Status nao informado"}</CardDescription>
-                </CardHeader>
+              return (
+                <Card key={event.id ?? `${event.title ?? "evento"}-${index}`}>
+                  {imageSrc ? (
+                    <img
+                      src={imageSrc}
+                      alt={event.title ?? "Imagem do evento"}
+                      className="h-44 w-full object-cover"
+                      loading="lazy"
+                      width={720}
+                      height={176}
+                    />
+                  ) : null}
 
-                <CardContent className="space-y-2">
-                  <p className="text-sm text-muted-foreground">
-                    {event.description ?? "Sem descricao"}
-                  </p>
-                  <p className="text-sm">Data: {formatEventDate(event.eventDate)}</p>
-                  <p className="text-sm">Capacidade: {event.capacity ?? 0}</p>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardHeader className="space-y-1">
+                    <CardTitle>{event.title ?? "Sem titulo"}</CardTitle>
+                    <CardDescription>{event.status ?? "Status nao informado"}</CardDescription>
+                  </CardHeader>
+
+                  <CardContent className="space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      {event.description ?? "Sem descricao"}
+                    </p>
+                    <p className="text-sm">Data: {formatEventDate(event.eventDate)}</p>
+                    <p className="text-sm">Capacidade: {event.capacity ?? 0}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         ) : null}
       </section>

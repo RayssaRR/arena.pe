@@ -49,8 +49,7 @@ export default function RegistroEventoPage() {
     setSuccessMessage(null);
 
     try {
-      const imageFilename = await uploadImageToPublicAssets(imagem);
-      const imageUrl = `/assets/uploads/${imageFilename}`;
+      const imageUrl = await uploadImageToPublicAssets(imagem, token);
 
       const payload = {
         title: String(formData.get("titulo") ?? "").trim(),
@@ -61,9 +60,6 @@ export default function RegistroEventoPage() {
         imageUrl,
       };
 
-      console.log(payload);
-      
-      
       await postJsonWithAuth(EVENTO_URL, payload, token);
       setSuccessMessage("Evento registrado com sucesso.");
       form.reset();

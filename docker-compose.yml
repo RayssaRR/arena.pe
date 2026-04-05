@@ -26,33 +26,36 @@ services:
     volumes:
       - ./back-end:/app
       - maven_cache:/root/.m2
+      - uploads_data:/app/uploads
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/arena
       SPRING_DATASOURCE_USERNAME: arena
       SPRING_DATASOURCE_PASSWORD: arena123
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
+      APP_UPLOAD_DIR: /app/uploads
     ports:
       - "8080:8080"
     depends_on:
       mysql:
         condition: service_healthy
 
-  # front-end:
-  # image: node:22-alpine
-  # container_name: arena_frontend
-  # working_dir: /app
-  # command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
-  # volumes:
-  #   - ./front-end:/app
-  #   - front_node_modules:/app/node_modules
-  # ports:
-  #   - "5173:5173"
-  # depends_on:
-  #   - back-end
+
+  front-end:
+    image: node:22-alpine
+    container_name: arena_frontend
+    working_dir: /app
+    command: sh -c "npm install && npm run build && npm run start"
+    volumes:
+      - ./front-end:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - back-end
 
 volumes:
   mysql_data:
   maven_cache:
-# front_node_modules:
-
+  uploads_data:
+  frontend_node_modules:
