@@ -51,7 +51,8 @@ public class EventService {
 
     public Event updateEvent(NewEventForm updatedEvent, String eventId, String creatorEmail) {
         verifyRole(creatorEmail);
-        var currentEvent = eventRepository.findById(UUID.fromString(eventId)).orElseThrow();
+        var currentEvent = eventRepository.findById(UUID.fromString(eventId))
+            .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
         updateEventData(updatedEvent, currentEvent);
         return currentEvent;
     }
