@@ -35,6 +35,7 @@ export default function EventForm() {
               <Label htmlFor="category">Categoria</Label>
               <Input placeholder="Digite a categoria"/>
             </div>
+            
           </div>
 
           <div className="flex flex-col space-y-1">
