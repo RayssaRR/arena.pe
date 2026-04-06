@@ -72,6 +72,10 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 - [Figma](https://www.figma.com/design/D62eYL12Df09nDAawUOc3s/POO?node-id=0-1&p=f&t=E8YG9T0vNyA9pul8-0)
 - [Screencast do Figma](https://www.youtube.com/watch?v=cgpgLJQdCh0)
 
+### Entrega 2
+
+- [Screencast do Figma](link)
+
 ## Contribuidores
 
 - Emanoel Henrick Alves da Silva - [emanoelhenrick](https://github.com/emanoelhenrick)
