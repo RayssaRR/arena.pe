@@ -40,8 +40,8 @@ public class Event extends BaseEntity {
         LocalDateTime eventDate,
         Integer capacity,
         User creator,
-        String imageUrl
-//        Category category
+        String imageUrl,
+       Category category
     ) {
         this.title = title;
         this.description = description;
@@ -51,7 +51,7 @@ public class Event extends BaseEntity {
         this.status = EventStatus.UPCOMING;
         this.creator = creator;
         this.imageUrl = imageUrl;
-//        this.category = category;
+        this.category = category;
     }
 
     public UUID getId() {

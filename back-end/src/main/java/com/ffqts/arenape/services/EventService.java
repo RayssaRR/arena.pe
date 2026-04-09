@@ -35,8 +35,8 @@ public class EventService {
 
         var creator = verifyRole(creatorEmail);
 
-//        Category category = categoryRepository.findById(newEventForm.categoryId())
-//                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
+        Category category = categoryRepository.findById(newEventForm.categoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
 
         Event newEvent = new Event(
             newEventForm.title(),
@@ -44,7 +44,8 @@ public class EventService {
             newEventForm.eventDate(),
             newEventForm.capacity(),
             creator,
-            newEventForm.imageUrl()
+            newEventForm.imageUrl(),
+            category
         );
 
         return eventRepository.save(newEvent);
