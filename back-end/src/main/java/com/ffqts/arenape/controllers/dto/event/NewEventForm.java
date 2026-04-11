@@ -11,7 +11,7 @@ public record NewEventForm(
     LocalDateTime eventDate,
     Integer capacity,
     EventStatus status,
-    String imageUrl
-//    Long categoryId
+    String imageUrl,
+    Long categoryId
 ) {
 }
