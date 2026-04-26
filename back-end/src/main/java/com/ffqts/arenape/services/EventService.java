@@ -1,10 +1,7 @@
 package com.ffqts.arenape.services;
 
 import com.ffqts.arenape.controllers.dto.event.NewEventForm;
-import com.ffqts.arenape.models.Event;
-import com.ffqts.arenape.models.EventStatus;
-import com.ffqts.arenape.models.RoleEnum;
-import com.ffqts.arenape.models.User;
+import com.ffqts.arenape.models.*;
 import com.ffqts.arenape.repositories.CategoryRepository;
 import com.ffqts.arenape.repositories.EventRepository;
 import com.ffqts.arenape.repositories.UserRepository;
@@ -25,7 +22,12 @@ public class EventService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private AuthService authService;
 
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
@@ -91,7 +93,8 @@ public class EventService {
             throw new IllegalArgumentException("Evento com esse título já existe");
         }
 
-        var creator = verifyRole(creatorEmail);
+        var creator = userRepository.findUserByEmail(creatorEmail)
+                .orElseThrow(() -> new IllegalArgumentException("Organizador não encontrado"));
 
         Category category = categoryRepository.findById(newEventForm.categoryId())
                 .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
@@ -109,8 +112,7 @@ public class EventService {
         return eventRepository.save(newEvent);
     }
 
-    public Event updateEvent(NewEventForm updatedEvent, String eventId, String creatorEmail) {
-        verifyRole(creatorEmail);
+    public Event updateEvent(NewEventForm updatedEvent, String eventId) {
         var currentEvent = eventRepository.findById(UUID.fromString(eventId))
             .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
         updateEventData(updatedEvent, currentEvent);
@@ -118,21 +120,9 @@ public class EventService {
     }
 
     public void deleteEvent(String eventId, String creatorEmail) {
-        verifyRole(creatorEmail);
         var event = eventRepository.findById(UUID.fromString(eventId))
             .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
         eventRepository.delete(event);
-    }
-
-    private User verifyRole(String userEmail) {
-        var creator = userRepository.findUserByEmail(userEmail)
-            .orElseThrow(() -> new IllegalArgumentException("Organizador não encontrado"));
-
-        if (creator.getRole() == RoleEnum.CUSTOMER ) {
-            throw new IllegalArgumentException("Usuário não tem permissão para gerenciar eventos");
-        }
-
-        return creator;
     }
 
     private void updateEventData(NewEventForm updatedEvent, Event currentEvent) {
