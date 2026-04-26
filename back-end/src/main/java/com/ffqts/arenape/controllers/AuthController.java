@@ -5,8 +5,8 @@ import com.ffqts.arenape.controllers.dto.auth.LoginResponse;
 import com.ffqts.arenape.controllers.dto.auth.RegisterForm;
 import com.ffqts.arenape.models.User;
 import com.ffqts.arenape.services.AuthService;
-import com.ffqts.arenape.config.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
@@ -27,4 +27,11 @@ public class AuthController {
         String token = service.authenticate(request.email(), request.password());
         return new LoginResponse(token);
     }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @PostMapping("/promote")
+    public void promoteUser(@RequestParam String email) {
+        service.promotesUser(email);
+    }
+
 }

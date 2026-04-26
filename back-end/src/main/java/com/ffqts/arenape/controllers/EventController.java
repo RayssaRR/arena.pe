@@ -21,6 +21,19 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
+    @GetMapping
+    public ResponseEntity<List<Event>> getAllEvents(
+    @RequestParam(required = false) String title,
+    @RequestParam(required = false) EventStatus status,
+    @RequestParam(required = false) Long categoryId,
+    @RequestParam(required = false) LocalDate date,
+    @RequestParam(required = false) String orderBy,
+    @RequestParam(required = false) String direction
+    ) {
+        var events = eventService.getFilteredEvents(title, status, categoryId, date, orderBy, direction);
+        return ResponseEntity.ok(events);
+    }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<Event> createEvent(@RequestBody NewEventForm newEventForm, HttpServletRequest req) {
@@ -47,19 +60,6 @@ public class EventController {
         var email = getEmailFromTokenRequest(req);
         eventService.deleteEvent(id, email);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Event>> getAllEvents(
-            @RequestParam(required = false) String title,
-            @RequestParam(required = false) EventStatus status,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) LocalDate date,
-            @RequestParam(required = false) String orderBy,
-            @RequestParam(required = false) String direction
-    ) {
-        var events = eventService.getFilteredEvents(title, status, categoryId, date, orderBy, direction);
-        return ResponseEntity.ok(events);
     }
 
     private String getEmailFromTokenRequest(HttpServletRequest req) {

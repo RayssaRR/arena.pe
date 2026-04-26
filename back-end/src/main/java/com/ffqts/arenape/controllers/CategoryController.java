@@ -20,6 +20,11 @@ public class CategoryController {
         return categoryService.getAllCategories();
     }
 
+    @GetMapping("/{id}")
+    public Category getCategoryById(@PathVariable Long id, @RequestBody Category category){
+        return categoryService.updateCategory(id, category);
+    }
+
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public Category createCategory(@RequestBody Category category){
@@ -36,11 +41,6 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public void deleteCategory(@PathVariable Long id){
         categoryService.deleteCategory(id);
-    }
-
-    @GetMapping("/{id}")
-    public Category getCategoryById(@PathVariable Long id, @RequestBody Category category){
-        return categoryService.updateCategory(id, category);
     }
 
 }
