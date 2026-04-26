@@ -1,8 +1,8 @@
 package com.ffqts.arenape.services;
 
 import com.ffqts.arenape.controllers.dto.event.NewEventForm;
-import com.ffqts.arenape.models.Category;
 import com.ffqts.arenape.models.Event;
+import com.ffqts.arenape.models.EventStatus;
 import com.ffqts.arenape.models.RoleEnum;
 import com.ffqts.arenape.models.User;
 import com.ffqts.arenape.repositories.CategoryRepository;
@@ -11,6 +11,9 @@ import com.ffqts.arenape.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +29,61 @@ public class EventService {
 
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
+    }
+
+    public List<Event> getFilteredEvents(
+            String title,
+            EventStatus status,
+            Long categoryId,
+            LocalDate date,
+            String orderBy,
+            String direction
+    ) {
+        String normalizedOrderBy = (orderBy == null || orderBy.isBlank()) ? "eventDate" : orderBy;
+        String normalizedDirection = (direction == null || direction.isBlank()) ? "asc" : direction.toLowerCase();
+
+        if (!List.of("eventDate", "title", "popularity").contains(normalizedOrderBy)) {
+            throw new IllegalArgumentException("Ordenação inválida. Use 'eventDate', 'title' ou 'popularity'");
+        }
+
+        if (!normalizedDirection.equals("asc") && !normalizedDirection.equals("desc")) {
+            throw new IllegalArgumentException("Direção inválida. Use 'asc' ou 'desc'");
+        }
+
+        if (categoryId != null) {
+            categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
+        }
+
+        List<Event> todos = eventRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+        List<Event> toUpdate = new ArrayList<>();
+
+        for (Event event : todos) {
+            if (event.getStatus() == EventStatus.CANCELED) continue;
+
+            EventStatus computed = now.isBefore(event.getEventDate())
+                    ? EventStatus.UPCOMING
+                    : EventStatus.COMPLETED;
+
+            if (event.getStatus() != computed) {
+                event.setStatus(computed);
+                toUpdate.add(event);
+            }
+        }
+
+        if (!toUpdate.isEmpty()) {
+            eventRepository.saveAll(toUpdate);
+        }
+
+        return eventRepository.findWithFilters(
+                title,
+                status,
+                categoryId,
+                date,
+                normalizedOrderBy,
+                normalizedDirection
+        );
     }
 
     public Event createEvent(NewEventForm newEventForm, String creatorEmail) {

@@ -3,15 +3,15 @@ package com.ffqts.arenape.controllers;
 import com.ffqts.arenape.config.JwtUtil;
 import com.ffqts.arenape.controllers.dto.event.NewEventForm;
 import com.ffqts.arenape.models.Event;
-import com.ffqts.arenape.repositories.UserRepository;
+import com.ffqts.arenape.models.EventStatus;
 import com.ffqts.arenape.services.EventService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/events")
@@ -46,8 +46,16 @@ public class EventController {
     }
 
     @GetMapping
-    public List<Event> getAllEvents() {
-        return eventService.getAllEvents();
+    public ResponseEntity<List<Event>> getAllEvents(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) EventStatus status,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) String orderBy,
+            @RequestParam(required = false) String direction
+    ) {
+        var events = eventService.getFilteredEvents(title, status, categoryId, date, orderBy, direction);
+        return ResponseEntity.ok(events);
     }
 
     private String getEmailFromTokenRequest(HttpServletRequest req) {
