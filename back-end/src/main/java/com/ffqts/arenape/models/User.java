@@ -3,11 +3,13 @@ package com.ffqts.arenape.models;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +50,10 @@ public class User extends BaseEntity implements UserDetails {
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Event> createdEvents;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VisitBooking> visitBookings = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(this.role.name()));
@@ -85,4 +91,6 @@ public class User extends BaseEntity implements UserDetails {
     public void setRole(RoleEnum role) { this.role = role; }
     public List<Event> getCreatedEvents() { return createdEvents; }
     public void setCreatedEvents(List<Event> createdEvents) { this.createdEvents = createdEvents; }
+    public List<VisitBooking> getVisitBookings() { return visitBookings; }
+    public void setVisitBookings(List<VisitBooking> visitBookings) { this.visitBookings = visitBookings; }
 }
