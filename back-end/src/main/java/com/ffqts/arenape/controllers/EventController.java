@@ -8,6 +8,7 @@ import com.ffqts.arenape.services.EventService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<Event> createEvent(@RequestBody NewEventForm newEventForm, HttpServletRequest req) {
         var email = getEmailFromTokenRequest(req);
@@ -27,6 +29,7 @@ public class EventController {
         return ResponseEntity.status(201).body(createdEvent);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<Event> updateEventById(
         @PathVariable String id,
@@ -34,10 +37,11 @@ public class EventController {
         HttpServletRequest req
     ) {
         var email = getEmailFromTokenRequest(req);
-        var updatedEvent = eventService.updateEvent(updatedEventForm, id, email);
+        var updatedEvent = eventService.updateEvent(updatedEventForm, id);
         return ResponseEntity.ok(updatedEvent);
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventById(@PathVariable String id, HttpServletRequest req) {
         var email = getEmailFromTokenRequest(req);
