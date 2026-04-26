@@ -41,4 +41,11 @@ public class AuthService {
         return JwtUtil.generateToken(((User) auth.getPrincipal()).getEmail());
     }
 
+    public void promotesUser(String email) {
+        var user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        user.setRole(RoleEnum.ADMIN);
+        userRepository.save(user);
+    }
+
 }
