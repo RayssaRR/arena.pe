@@ -69,11 +69,17 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 ### Entrega 1
 
 - [Histórias de Usuário](https://docs.google.com/document/d/1xkyBUIlEBqiuUwNKGcrFDna4Z5a3j3zyPY98hnlMEkU/edit?tab=t.0#heading=h.o4dna26bryia)
-- [Screencast](https://www.youtube.com/watch?v=cgpgLJQdCh0)
+- [Screencast 1](https://www.youtube.com/watch?v=cgpgLJQdCh0)
 
 ### Entrega 2
 
-- [Screencast](https://www.youtube.com/watch?v=yutaZgf71wg&feature=youtu.be)
+- [Screencast 2](https://www.youtube.com/watch?v=yutaZgf71wg&feature=youtu.be)
+
+### Entrega 3
+
+- [Screencast 3](https://www.youtube.com/watch?v=yutaZgf71wg&feature=youtu.be)
+- **Issue/bug tracker:**
+<img width="1209" height="289" alt="Issue_Bug_Tracker" src="https://github.com/user-attachments/assets/c00119b9-3564-4f37-9d31-0d42770ea220" />
 
 ## Contribuidores
 
