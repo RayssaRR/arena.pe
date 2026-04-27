@@ -17,9 +17,10 @@ public class Visit extends BaseEntity {
 
     private LocalDateTime date;
 
-    private int maxVisitors;
+    @Enumerated(EnumType.STRING)
+    private Shift shift;
 
-    private int currentBookings;
+    private int maxVisitors;
 
     @JsonIgnore
     @OneToMany(mappedBy = "visit", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -37,20 +38,20 @@ public class Visit extends BaseEntity {
         this.date = date;
     }
 
+    public Shift getShift() {
+        return shift;
+    }
+
+    public void setShift(Shift shift) {
+        this.shift = shift;
+    }
+
     public int getMaxVisitors() {
         return maxVisitors;
     }
 
     public void setMaxVisitors(int maxVisitors) {
         this.maxVisitors = maxVisitors;
-    }
-
-    public int getCurrentBookings() {
-        return currentBookings;
-    }
-
-    public void setCurrentBookings(int currentBookings) {
-        this.currentBookings = currentBookings;
     }
 
     public List<VisitBooking> getBookings() {
@@ -60,5 +61,4 @@ public class Visit extends BaseEntity {
     public void setBookings(List<VisitBooking> bookings) {
         this.bookings = bookings;
     }
-
 }

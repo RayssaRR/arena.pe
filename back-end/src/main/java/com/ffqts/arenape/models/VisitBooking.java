@@ -52,5 +52,4 @@ public class VisitBooking extends BaseEntity {
     public void setVisit(Visit visit) {
         this.visit = visit;
     }
-
 }
