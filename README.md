@@ -74,6 +74,8 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 ### Entrega 2
 
 - [Screencast 2](https://www.youtube.com/watch?v=yutaZgf71wg&feature=youtu.be)
+- **Issue/bug tracker:**
+<img width="1209" height="289" alt="Issue_Bug_Tracker" src="https://github.com/user-attachments/assets/c00119b9-3564-4f37-9d31-0d42770ea220" />
 
 ### Entrega 3
 
