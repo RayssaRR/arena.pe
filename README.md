@@ -83,6 +83,10 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 - **Issue/bug tracker:**
 <img width="1205" height="241" alt="Issue_Bug_Tracker" src="https://github.com/user-attachments/assets/fcdd37c7-88d3-432f-b06e-0f7f2ed8e630" />
 
+### Entrega 4
+
+- [Screencast 3]()
+- **Issue/bug tracker:**
 
 ## Contribuidores
 
