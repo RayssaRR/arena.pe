@@ -91,6 +91,14 @@ public class EventService {
             throw new IllegalArgumentException("Evento com esse título já existe");
         }
 
+        if (newEventForm.eventDate().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("A data do evento não pode ser no passado");
+        }
+
+        if (newEventForm.capacity() <= 0) {
+            throw new IllegalArgumentException("A capacidade deve ser maior que zero");
+        }
+
         var creator = verifyRole(creatorEmail);
 
 //        Category category = categoryRepository.findById(newEventForm.categoryId())
