@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClipboardClock, Coins, ImageDown, Info } from "lucide-react";
+import Link from "next/link";
 
 export default function EventForm() {
   return (
@@ -115,8 +116,10 @@ export default function EventForm() {
 
         {/* Actions */}
         <footer className="flex justify-end gap-3">
-          <Button variant="secondary" className="px-8 py-4 cursor-pointer">Cancelar</Button>
-          <Button className="bg-blue-600 px-10 py-5 cursor-pointer" type="submit">
+          <Link href="/dashboard">
+            <Button variant="secondary" className="px-8 py-4 cursor-pointer">Cancelar</Button>
+          </Link>
+          <Button className="bg-(--blue) px-10 py-5 cursor-pointer" type="submit">
             Salvar evento
           </Button>
         </footer>

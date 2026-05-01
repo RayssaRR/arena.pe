@@ -80,6 +80,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --green-light: oklch(90.5% 0.093 164.15);
+  --green-dark:oklch(44.8% 0.119 151.328);
+  --blue: oklch(54.6% 0.245 262.881);
+  --blue-hover: oklch(48.8% 0.243 264.376);
+  --red: oklch(57.7% 0.245 27.325);
+  --red-hover: oklch(50.5% 0.213 27.518);
+  --gray: oklch(55.1% 0.027 264.364);
 
 }
 
@@ -134,8 +141,12 @@
   .title-h1 { @apply text-4xl font-bold leading-tight text-foreground; }
   .title-h2 { @apply text-3xl font-bold leading-snug text-foreground; }
   .title-h3 { @apply text-2xl font-semibold leading-snug text-foreground mb-5 mt-7; }
-  .subtitle { @apply text-xl font-semibold leading-relaxed  text-gray-500; }
+  .subtitle { @apply text-xl font-semibold leading-relaxed text-gray-500; }
   .body { @apply text-base font-normal leading-relaxed text-foreground; }
   .body-sm { @apply text-sm font-normal leading-relaxed text-foreground; }
   .body-lg { @apply text-lg font-bold leading-relaxed text-foreground; }
+
+  .input {
+    @apply h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50;
+  }
 }

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function Login() {
+export default function LoginForm() {
   const buttonStyle = "flex-1 bg-white/0 border-2 border-gray-300 text-gray-500 cursor-pointer"
   return (
     <form className="flex flex-col space-y-4">
@@ -38,7 +38,7 @@ export default function Login() {
 
         <a
           href="#"
-          className="text-sm text-blue-600 font-bold hover:pointer"
+          className="text-sm text-(--blue) font-bold hover:pointer"
         >
           Esqueceu sua senha?
         </a>
@@ -46,7 +46,7 @@ export default function Login() {
       </div>
 
       {/* Entrar */}
-      <Button className="bg-blue-600 py-4 cursor-pointer">Entrar</Button>
+      <Button className="bg-(--blue) py-4 cursor-pointer">Entrar</Button>
       <p className="self-center text-gray-500">Ou continue com</p>
 
       {/* Google e Facebook */}

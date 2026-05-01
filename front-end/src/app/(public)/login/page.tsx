@@ -1,18 +1,17 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import EventForm from "../(private)/events/EventForm";
-import MyEvents from "../(private)/events/page";
-import Login from "./Login";
-import Register from "./Register";
+
+import Login from "./components/LoginForm";
+import Register from "./components/RegisterForm";
 import { useState } from "react";
 
 export default function Page() {
-  const [type, setType] = useState<"login" | "register" >("login");
+  const [type, setType] = useState<"login" | "register">("login");
 
   const tabClass = (active: boolean) =>
     `flex-1 font-bold transition ${
       active
-        ? "bg-white text-blue-600"
+        ? "bg-white text-(--blue)"
         : "bg-transparent text-gray-600 hover:text-black cursor-pointer"
     }`;
 
@@ -40,7 +39,7 @@ export default function Page() {
           lugar. Sinta a energia da arena.
         </p>
 
-      {/* Tabs */}
+        {/* Tabs */}
         <nav className="flex bg-gray-300 rounded-lg p-0.5 mt-5">
           <Button
             onClick={() => setType("login")}
