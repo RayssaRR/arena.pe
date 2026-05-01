@@ -1,7 +1,7 @@
 package com.ffqts.arenape.controllers;
 
-import com.ffqts.arenape.config.JwtUtil;
 import com.ffqts.arenape.controllers.dto.event.NewEventForm;
+import com.ffqts.arenape.controllers.utils.GetEmailFromTokenRequest;
 import com.ffqts.arenape.models.Event;
 import com.ffqts.arenape.models.EventStatus;
 import com.ffqts.arenape.services.EventService;
@@ -37,7 +37,7 @@ public class EventController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping
     public ResponseEntity<Event> createEvent(@RequestBody NewEventForm newEventForm, HttpServletRequest req) {
-        var email = getEmailFromTokenRequest(req);
+        var email = GetEmailFromTokenRequest.get(req);
         var createdEvent = eventService.createEvent(newEventForm, email);
         return ResponseEntity.status(201).body(createdEvent);
     }
@@ -46,10 +46,8 @@ public class EventController {
     @PutMapping("/{id}")
     public ResponseEntity<Event> updateEventById(
         @PathVariable String id,
-        @RequestBody NewEventForm updatedEventForm,
-        HttpServletRequest req
+        @RequestBody NewEventForm updatedEventForm
     ) {
-        var email = getEmailFromTokenRequest(req);
         var updatedEvent = eventService.updateEvent(updatedEventForm, id);
         return ResponseEntity.ok(updatedEvent);
     }
@@ -57,15 +55,11 @@ public class EventController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventById(@PathVariable String id, HttpServletRequest req) {
-        var email = getEmailFromTokenRequest(req);
+        var email = GetEmailFromTokenRequest.get(req);
         eventService.deleteEvent(id, email);
         return ResponseEntity.noContent().build();
     }
 
-    private String getEmailFromTokenRequest(HttpServletRequest req) {
-        String token = req.getHeader("Authorization");
-        String actualToken = token.replace("Bearer ", "");
-        return JwtUtil.validate(actualToken);
-    }
+
 
 }
