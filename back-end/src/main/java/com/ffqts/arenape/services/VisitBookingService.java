@@ -1,6 +1,7 @@
 package com.ffqts.arenape.services;
 
 import com.ffqts.arenape.models.*;
+import com.ffqts.arenape.repositories.UserRepository;
 import com.ffqts.arenape.repositories.VisitBookingRepository;
 import com.ffqts.arenape.repositories.VisitRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,20 +12,26 @@ import jakarta.transaction.Transactional;
 public class VisitBookingService {
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private VisitRepository visitRepository;
 
     @Autowired
     private VisitBookingRepository bookingRepository;
 
     @Transactional
-    public VisitBooking book(Long visitId, User user) {
+    public VisitBooking book(Long visitId, String userEmail) {
+
+        var user = userRepository.findUserByEmail(userEmail)
+            .orElseThrow(() -> new IllegalArgumentException("Usuario não encontrado"));
 
         var visit = visitRepository.findById(visitId)
-                .orElseThrow(() -> new IllegalArgumentException("Visit not found"));
+            .orElseThrow(() -> new IllegalArgumentException("Visit not found"));
 
         int total = bookingRepository.countByVisitAndStatus(
-                visit,
-                VisitBookingStatus.CONFIRMED
+            visit,
+            VisitBookingStatus.CONFIRMED
         );
 
         if (total >= visit.getMaxVisitors()) {
@@ -44,4 +51,5 @@ public class VisitBookingService {
 
         return bookingRepository.save(booking);
     }
+
 }
