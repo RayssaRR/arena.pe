@@ -12,8 +12,8 @@ const lexendSans = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: "Arena.pe",
-  description: "Plataforma de eventos Arena.pe",
+  title: "Arena.PE",
+  description: "",
 };
 
 export default function RootLayout({
