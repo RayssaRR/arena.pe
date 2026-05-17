@@ -1,3 +1,3 @@
 package com.ffqts.arenape.models;
 
-public enum RoleEnum { CUSTOMER, ORGANIZER, ADMIN }
+public enum RoleEnum { CUSTOMER, ADMIN }

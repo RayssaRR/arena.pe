@@ -69,14 +69,30 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 ### Entrega 1
 
 - [Histórias de Usuário](https://docs.google.com/document/d/1xkyBUIlEBqiuUwNKGcrFDna4Z5a3j3zyPY98hnlMEkU/edit?tab=t.0#heading=h.o4dna26bryia)
-- [Figma](https://www.figma.com/design/D62eYL12Df09nDAawUOc3s/POO?node-id=0-1&p=f&t=E8YG9T0vNyA9pul8-0)
-- [Screencast do Figma](https://www.youtube.com/watch?v=cgpgLJQdCh0)
+- [Screencast 1](https://www.youtube.com/watch?v=cgpgLJQdCh0)
+
+### Entrega 2
+
+- [Screencast 2](https://www.youtube.com/watch?v=yutaZgf71wg&feature=youtu.be)
+- **Issue/bug tracker:**
+<img width="1209" height="289" alt="Issue_Bug_Tracker" src="https://github.com/user-attachments/assets/c00119b9-3564-4f37-9d31-0d42770ea220" />
+
+### Entrega 3
+
+- [Screencast 3](https://www.youtube.com/watch?v=HychS5vl9x0)
+- **Issue/bug tracker:**
+<img width="1205" height="241" alt="Issue_Bug_Tracker" src="https://github.com/user-attachments/assets/fcdd37c7-88d3-432f-b06e-0f7f2ed8e630" />
+
+### Entrega 4
+
+- [Screencast 3]()
+- **Issue/bug tracker:**
 
 ## Contribuidores
 
 - Emanoel Henrick Alves da Silva - [emanoelhenrick](https://github.com/emanoelhenrick)
 - Felipe Lopes Vasconcelos - [FelipeLV12](https://github.com/FelipeLV12)
-- Jennifer Zeferino Cruz de Lima - [injuje](https://github.com/injuje)
-- José Leandro Ventura Rocha da Silva - [jenniferzeferino](https://github.com/jenniferzeferino)
+- Jennifer Zeferino Cruz de Lima - [jenniferzeferino](https://github.com/jenniferzeferino)
+- José Leandro Ventura Rocha da Silva - [injuje](https://github.com/injuje)
 - Raiele Leite da Silva - [RaieleLeite](https://github.com/RaieleLeite)
 - Rayssa Santana Ribeiro - [RayssaRR](https://github.com/RayssaRR)

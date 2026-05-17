@@ -26,19 +26,11 @@ public class AuthService {
 
     @Transactional
     public User register(RegisterForm registerForm) {
-        if (userRepository.findUserByEmail(registerForm.email()).isPresent()) {
-            throw new IllegalArgumentException("Email já registrado");
-        }
+        var userExists = userRepository.findUserByEmail(registerForm.email()).isPresent();
+        if (userExists) { throw new IllegalArgumentException("Email já registrado"); }
 
-        if (registerForm.role() == RoleEnum.ADMIN) {
-            throw new IllegalArgumentException("Não é permitido registrar como ADMIN");
-        }
-
-        User newUser = new User();
-        newUser.setName(registerForm.name());
-        newUser.setEmail(registerForm.email());
-        newUser.setPassword(passwordEncoder.encode(registerForm.password()));
-        newUser.setRole(registerForm.role());
+        var encodedPassword = passwordEncoder.encode(registerForm.password());
+        var newUser = new User(registerForm.name(), registerForm.email(), encodedPassword);
 
         return userRepository.save(newUser);
     }
@@ -48,4 +40,12 @@ public class AuthService {
         var auth = this.authenticationManager.authenticate(usernamePassword);
         return JwtUtil.generateToken(((User) auth.getPrincipal()).getEmail());
     }
+
+    public void promotesUser(String email) {
+        var user = userRepository.findUserByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        user.setRole(RoleEnum.ADMIN);
+        userRepository.save(user);
+    }
+
 }
