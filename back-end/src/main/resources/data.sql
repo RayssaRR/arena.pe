@@ -9,4 +9,15 @@ VALUES (
   'ADMIN'
 );
 
+-- Inserir categorias de eventos
+INSERT INTO categories (title, description) VALUES
+('Show', 'Shows musicais, apresentações de artistas e performances'),
+('Esportes', 'Eventos esportivos diversos: futebol, voleibol, basquete'),
+('Tour', 'Tours e visitas guiadas ao estádio'),
+('Conferência', 'Conferências, palestras e eventos corporativos'),
+('Treinamento', 'Treinos abertos, clínicas e workshops esportivos'),
+('Festival', 'Festivais, feiras e eventos culturais'),
+('Casamento', 'Eventos privados e celebrações'),
+('Outro', 'Outros tipos de eventos não classificados');
+
 COMMIT;

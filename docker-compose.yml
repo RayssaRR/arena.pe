@@ -41,18 +41,18 @@ services:
         condition: service_healthy
 
 
-  front-end:
-    image: node:22-alpine
-    container_name: arena_frontend
-    working_dir: /app
-    command: sh -c "npm install && npm run build && npm run start"
-    volumes:
-      - ./front-end:/app
-      - frontend_node_modules:/app/node_modules
-    ports:
-      - "3000:3000"
-    depends_on:
-      - back-end
+  # front-end:
+  #   image: node:22-alpine
+  #   container_name: arena_frontend
+  #   working_dir: /app
+  #   command: sh -c "npm install && npm run build && npm run start"
+  #   volumes:
+  #     - ./front-end:/app
+  #     - frontend_node_modules:/app/node_modules
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - back-end
 
 volumes:
   mysql_data:

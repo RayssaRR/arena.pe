@@ -88,6 +88,11 @@ public class EventService {
         );
     }
 
+    public Event getEventById(String eventId) {
+        return eventRepository.findById(UUID.fromString(eventId))
+                .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
+    }
+
     public Event createEvent(NewEventForm newEventForm, String creatorEmail) {
         if (eventRepository.findByTitle(newEventForm.title()).isPresent()) {
             throw new IllegalArgumentException("Evento com esse título já existe");

@@ -12,10 +12,10 @@ export default function EventForm() {
         {/* Header */}
         <header className="space-y-1">
           <h1 className="title-h1">
-            Criar novo evento
+            Editar Evento
           </h1>
           <p className="subtitle">
-            Configure os detalhes do evento, programação e preços.
+            Edite os detalhes do seu evento, a programação e os preços dos ingressos.
           </p>
         </header>
 
@@ -120,7 +120,7 @@ export default function EventForm() {
             <Button variant="secondary" className="px-8 py-4 cursor-pointer">Cancelar</Button>
           </Link>
           <Button className="bg-(--blue) px-10 py-5 cursor-pointer" type="submit">
-            Salvar evento
+            Atualizar Evento
           </Button>
         </footer>
       </form>

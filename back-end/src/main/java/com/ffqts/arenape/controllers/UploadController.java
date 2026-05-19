@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-@PreAuthorize("hasAuthority('ADMIN')")
 @RestController
 @RequestMapping("/uploads")
 public class UploadController {
@@ -42,6 +41,7 @@ public class UploadController {
         this.uploadDirectory = Paths.get(uploadDir).toAbsolutePath().normalize();
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, String>> uploadImage(@RequestPart("file") MultipartFile file)
         throws IOException {
