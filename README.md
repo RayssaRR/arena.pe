@@ -257,6 +257,16 @@ Depois, reinicie a sessão do terminal.
 
 ---
 
+## Usuário ADMIN
+
+O sistema possui um usuário do tipo administrador padrão com as seguintes credenciais:
+
+| Email | Senha |
+|-------|-------|
+| admin@arena.pe | `admin123` |
+
+---
+
 ## Tecnologias dos Containers
 
 | Serviço | Imagem Docker |
