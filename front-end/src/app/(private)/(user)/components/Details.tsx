@@ -1,11 +1,10 @@
 'use client'
 import { useState } from "react";
 import Overview from "./Overview";
-import Lineups from "./Lineups";
 import Location from "./Location";
 
 export default function Details(){
-    const [type, setType] = useState<"overview" | "lineups" | "location">("overview");
+    const [type, setType] = useState<"overview" | "location">("overview");
 
     const tabClass = (active: boolean) =>
     `font-bold transition ${
@@ -24,12 +23,6 @@ export default function Details(){
                     Visão Geral
                 </button>
                 <button
-                    onClick={() => setType("lineups")}
-                    className={tabClass(type === "lineups")}
-                >
-                    Escalações
-                </button>
-                <button
                     onClick={() => setType("location")}
                     className={tabClass(type === "location")}
                 >
@@ -40,7 +33,6 @@ export default function Details(){
 
             {/* Conteúdo */}
                 {type === "overview" && <Overview/>}
-                {type === "lineups" && <Lineups/>}
                 {type === "location" && <Location/>}
         </>
     )

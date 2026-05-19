@@ -1,13 +1,16 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-
+import { useSearchParams } from "next/navigation";
 import Login from "./components/LoginForm";
 import Register from "./components/RegisterForm";
 import { useState } from "react";
 
 export default function Page() {
-  const [type, setType] = useState<"login" | "register">("login");
+  const searchParams = useSearchParams();
+  const [type, setType] = useState<"login" | "register">(
+    searchParams.get("tab") === "register" ? "register" : "login"
+  );
 
   const tabClass = (active: boolean) =>
     `flex-1 font-bold transition ${
