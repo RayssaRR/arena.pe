@@ -22,6 +22,7 @@ public class EventController {
     private EventService eventService;
 
     @GetMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<List<Event>> getAllEvents(
     @RequestParam(required = false) String title,
     @RequestParam(required = false) EventStatus status,
@@ -32,6 +33,13 @@ public class EventController {
     ) {
         var events = eventService.getFilteredEvents(title, status, categoryId, date, orderBy, direction);
         return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<Event> getEventById(@PathVariable String id) {
+        var event = eventService.getEventById(id);
+        return ResponseEntity.ok(event);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

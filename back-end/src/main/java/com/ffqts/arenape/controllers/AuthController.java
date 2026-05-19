@@ -24,8 +24,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody @Valid LoginRequest request) {
-        String token = service.authenticate(request.email(), request.password());
-        return new LoginResponse(token);
+        return service.authenticate(request.email(), request.password());
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

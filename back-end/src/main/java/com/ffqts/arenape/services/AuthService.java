@@ -2,6 +2,7 @@ package com.ffqts.arenape.services;
 
 import com.ffqts.arenape.config.JwtUtil;
 import com.ffqts.arenape.controllers.dto.auth.RegisterForm;
+import com.ffqts.arenape.controllers.dto.auth.LoginResponse;
 import com.ffqts.arenape.models.RoleEnum;
 import com.ffqts.arenape.models.User;
 import com.ffqts.arenape.repositories.UserRepository;
@@ -35,10 +36,12 @@ public class AuthService {
         return userRepository.save(newUser);
     }
 
-    public String authenticate(String email, String rawPassword) {
+    public LoginResponse authenticate(String email, String rawPassword) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(email, rawPassword);
         var auth = this.authenticationManager.authenticate(usernamePassword);
-        return JwtUtil.generateToken(((User) auth.getPrincipal()).getEmail());
+        var user = ((User) auth.getPrincipal());
+        var token = JwtUtil.generateToken(user.getEmail(), user.getRole().toString(), user.getName());
+        return new LoginResponse(token, user.getRole().toString());
     }
 
     public void promotesUser(String email) {

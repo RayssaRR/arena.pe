@@ -47,6 +47,18 @@ export async function getJsonWithAuth<TResponse = unknown>(
   return data;
 }
 
+export async function getJson<TResponse = unknown>(
+  url: string,
+): Promise<TResponse> {
+  const { data } = await axios.get<TResponse>(url, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  return data;
+}
+
 export async function uploadImageToPublicAssets(
   file: File,
   token?: string,
@@ -109,4 +121,92 @@ export function resolvePublicAssetUrl(assetPath?: string): string | null {
   }
 
   return `${BACKEND_BASE_URL}/${value.replace(/^\/+/, "")}`;
+}
+
+// Auth types
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export interface RegisterResponse {
+  id?: string;
+  name: string;
+  email: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  role: "ADMIN" | "CUSTOMER";
+}
+
+// Auth functions
+export async function register(payload: RegisterRequest): Promise<RegisterResponse> {
+  const url = `${BACKEND_BASE_URL}/auth/register`;
+  return postJson<RegisterResponse>(url, payload);
+}
+
+export async function login(payload: LoginRequest): Promise<LoginResponse> {
+  const url = `${BACKEND_BASE_URL}/auth/login`;
+  return postJson<LoginResponse>(url, payload);
+}
+
+// Event types
+export interface Category {
+  id: number;
+  title: string;
+  description?: string;
+}
+
+export interface CreateEventRequest {
+  title: string;
+  description: string;
+  eventDate: string; // ISO 8601 format (2026-05-19T14:30:00)
+  capacity: number;
+  status: "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELED";
+  imageUrl: string;
+  categoryId: number;
+}
+
+export interface EventResponse {
+  id: string;
+  title: string;
+  description: string;
+  eventDate: string;
+  capacity: number;
+  ticketsSold: number;
+  status: string;
+  imageUrl: string;
+  category?: Category;
+}
+
+// Event functions
+export async function getCategories(token?: string): Promise<Category[]> {
+  const url = `${BACKEND_BASE_URL}/categories`;
+  if (token) {
+    return getJsonWithAuth<Category[]>(url, token);
+  }
+  return getJson<Category[]>(url);
+}
+
+export async function createEvent(
+  payload: CreateEventRequest,
+  token: string
+): Promise<EventResponse> {
+  const url = `${BACKEND_BASE_URL}/events`;
+  return postJsonWithAuth<EventResponse>(url, payload, token);
+}
+
+export async function getEvents(token?: string): Promise<EventResponse[]> {
+  const url = `${BACKEND_BASE_URL}/events`;
+  if (token) {
+    return getJsonWithAuth<EventResponse[]>(url, token);
+  }
+  return getJson<EventResponse[]>(url);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Header from "@/app/(private)/(user)/components/Header";
+import { Header } from "@/components/Header";
 import Filter from "@/app/(private)/(user)/components/Filter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -38,13 +38,6 @@ const SORT_OPTIONS: SortOption[] = [
   { label: "Z-A", orderBy: "title", direction: "desc" },
 ];
 
-const CATEGORY_MAP: Record<string, string> = {
-  Esportes: "Esporte",
-  Shows: "Show",
-  Tours: "Tour",
-  "E-Sports": "E-Sport",
-};
-
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date
@@ -61,33 +54,42 @@ function EventCard({ event }: { event: Event }) {
   const router = useRouter();
 
   return (
-    <Card className="mx-auto w-full pt-0">
-      <CardHeader className="bg-black/70 text-white p-5 min-h-20">
-        <p className="bg-white p-1 rounded-md text-(--blue) font-bold w-fit px-4 text-sm">
-          {event.category?.title ?? "Geral"}
-        </p>
+    <Card 
+      className="mx-auto w-full pt-0 overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+      onClick={() => router.push(`/event-details?id=${event.id}`)}
+    >
+      <CardHeader className="relative bg-black/70 text-white p-3 h-48 overflow-hidden">
+        {/* Background Image */}
+        {event.imageUrl && (
+          <img
+            src={event.imageUrl.startsWith('/') ? BACKEND_URL + event.imageUrl : event.imageUrl}
+            alt={event.title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        )}
+
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/70"></div>
+
+        {/* Content */}
+        <div className="relative z-10">
+          <p className="bg-white p-1 rounded-md text-(--blue) font-bold w-fit px-3 text-xs">
+            {event.category?.title ?? "Geral"}
+          </p>
+        </div>
       </CardHeader>
 
-      <CardContent className="space-y-2 p-5">
-        <p className="text-(--blue) font-bold text-sm">{formatDate(event.eventDate)}</p>
-        <h4 className="body-lg font-semibold">{event.title}</h4>
-        <p className="text-(--gray) text-sm line-clamp-2">{event.description}</p>
+      <CardContent className="space-y-1 p-3">
+        <p className="text-(--blue) font-bold text-xs">{formatDate(event.eventDate)}</p>
+        <h4 className="font-semibold text-sm line-clamp-2">{event.title}</h4>
+        <p className="text-(--gray) text-xs line-clamp-1">{event.description}</p>
       </CardContent>
-
-      <CardFooter className="flex justify-end gap-5 bg-white p-5">
-        <Button
-          onClick={() => router.push(`/event-details/${event.id}`)}
-          className="bg-(--blue) hover:bg-(--blue-hover) cursor-pointer"
-        >
-          Detalhes
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
 
 type FilterState = {
-  categories: string[];
+  categories: number[];
   date: string;
   maxPrice: number;
 };
@@ -96,6 +98,11 @@ export default function EventDiscover() {
   const [allEvents, setAllEvents] = useState<Event[]>([]);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Adicionar margem para renderização do Header
+  useEffect(() => {
+    // O Header é renderizado no topo, não precisa de espaço extra aqui
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
@@ -118,23 +125,26 @@ export default function EventDiscover() {
           direction: sort.direction,
         });
 
+        // Enviar o ID da categoria (já é um número)
         if (filters.categories.length === 1) {
-          params.set("category", CATEGORY_MAP[filters.categories[0]] ?? filters.categories[0]);
+          const categoryId = filters.categories[0];
+          params.set("categoryId", categoryId.toString());
         }
 
         if (filters.date) {
           params.set("date", filters.date);
         }
 
-        if (filters.maxPrice < 500) {
-          params.set("maxPrice", filters.maxPrice.toString());
-        }
+        const url = `${BACKEND_URL}/events?${params.toString()}`;
+        console.log("Fetching eventos com URL:", url);
 
-        const res = await fetch(`${BACKEND_URL}/events?${params.toString()}`);
+        const res = await fetch(url);
         if (!res.ok) throw new Error("Erro ao buscar eventos");
         const data: Event[] = await res.json();
+        console.log("Eventos recebidos:", data.length);
         setAllEvents(data);
-      } catch {
+      } catch (err) {
+        console.error("Erro ao buscar eventos:", err);
         setError("Não foi possível carregar os eventos.");
       } finally {
         setIsLoading(false);

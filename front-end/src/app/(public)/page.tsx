@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Category from "@/app/(private)/(user)/components/Category";
-import Header from "@/app/(private)/(user)/components/Header";
+import { Header } from "@/components/Header";
 import SearchBar from "@/app/(private)/(user)/components/Searchbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";

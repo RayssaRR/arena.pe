@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Calendar, MapPin } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Header from "@/app/(private)/(user)/components/Header";
 import BuyTicketCard from "../components/BuyTicketCard";
 import Details from "../components/Details";
 
@@ -68,7 +67,7 @@ function NextEventCard({ event }: { event: Event }) {
 
       <CardFooter className="flex justify-end gap-5 bg-white p-5">
         <Button
-          onClick={() => router.push(`/event-details/${event.id}`)}
+          onClick={() => router.push(`/event-details?id=${event.id}`)}
           className="bg-(--blue) hover:bg-(--blue-hover) cursor-pointer"
         >
           Detalhes
@@ -79,8 +78,27 @@ function NextEventCard({ event }: { event: Event }) {
 }
 
 export default function EventDetails() {
-  const params = useParams();
-  const eventId = params?.id as string;
+  return (
+    <Suspense fallback={<LoadingState />}>
+      <EventDetailsContent />
+    </Suspense>
+  );
+}
+
+function LoadingState() {
+  return (
+    <div className="min-h-screen bg-[#F5F7F8]">
+      <main className="p-8">
+        <p className="text-sm text-muted-foreground animate-pulse">Carregando evento...</p>
+      </main>
+    </div>
+  );
+}
+
+function EventDetailsContent() {
+  const searchParams = useSearchParams();
+  const eventId = searchParams?.get('id');
+  const router = useRouter();
 
   const [event, setEvent] = useState<Event | null>(null);
   const [otherEvents, setOtherEvents] = useState<Event[]>([]);
@@ -88,6 +106,12 @@ export default function EventDetails() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!eventId) {
+      setError("ID do evento não fornecido");
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchData() {
       try {
         setIsLoading(true);
@@ -106,20 +130,20 @@ export default function EventDetails() {
           const othersData: Event[] = await othersRes.json();
           setOtherEvents(othersData.filter((e) => e.id !== eventId).slice(0, 4));
         }
-      } catch {
+      } catch (err) {
+        console.error("Erro ao buscar evento:", err);
         setError("Não foi possível carregar o evento.");
       } finally {
         setIsLoading(false);
       }
     }
 
-    if (eventId) fetchData();
+    fetchData();
   }, [eventId]);
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F5F7F8]">
-        <Header />
         <main className="p-8">
           <p className="text-sm text-muted-foreground animate-pulse">Carregando evento...</p>
         </main>
@@ -130,7 +154,6 @@ export default function EventDetails() {
   if (error || !event) {
     return (
       <div className="min-h-screen bg-[#F5F7F8]">
-        <Header />
         <main className="p-8">
           <p className="text-sm text-destructive">{error ?? "Evento não encontrado."}</p>
         </main>
@@ -140,25 +163,38 @@ export default function EventDetails() {
 
   return (
     <div className="min-h-screen bg-[#F5F7F8]">
-      <Header />
-
       <main className="p-8">
         {/* Hero */}
-        <section className="bg-black/70 text-white p-10 rounded-3xl h-[50vh] flex flex-col justify-end gap-3 shadow-xl">
-          <p className="bg-(--blue) p-1 rounded-full font-bold w-fit px-4">
-            {event.category?.title ?? "Geral"}
-          </p>
+        <section className="relative rounded-3xl h-[50vh] overflow-hidden shadow-xl">
+          {/* Background Image */}
+          {event.imageUrl && (
+            <img
+              src={event.imageUrl.startsWith('/') ? BACKEND_URL + event.imageUrl : event.imageUrl}
+              alt={event.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
 
-          <p className="title-h1 text-white">{event.title}</p>
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/70"></div>
 
-          <div className="flex gap-10">
-            <div className="flex gap-2">
-              <Calendar />
-              <p className="inline">{formatDate(event.eventDate)}</p>
-            </div>
-            <div className="flex gap-2">
-              <MapPin />
-              <p className="inline">Arena Pernambuco, Recife</p>
+          {/* Content */}
+          <div className="relative z-10 text-white p-10 h-full flex flex-col justify-end gap-3">
+            <p className="bg-(--blue) p-1 rounded-full font-bold w-fit px-4">
+              {event.category?.title ?? "Geral"}
+            </p>
+
+            <p className="title-h1 text-white">{event.title}</p>
+
+            <div className="flex gap-10">
+              <div className="flex gap-2">
+                <Calendar />
+                <p className="inline">{formatDate(event.eventDate)}</p>
+              </div>
+              <div className="flex gap-2">
+                <MapPin />
+                <p className="inline">Arena Pernambuco, Recife</p>
+              </div>
             </div>
           </div>
         </section>
