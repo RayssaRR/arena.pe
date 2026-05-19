@@ -88,7 +88,9 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 - [Screencast 4]()
 - **Issue/bug tracker:**
 <img width="1072" height="274" alt="Captura de tela 2026-05-17 231203" src="https://github.com/user-attachments/assets/d7ac0f48-f7e1-47bf-81f5-ee64d25c09bc" />
-- **Como Clonar e Executar o Projeto:**
+
+### Como Clonar e Executar o Projeto
+
 ## Pré-requisitos
 
 Antes de começar, certifique-se de ter instalado na sua máquina:
