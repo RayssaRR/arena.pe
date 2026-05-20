@@ -89,9 +89,9 @@ A comunicação entre frontend e backend ocorre por meio de requisições HTTP u
 - **Issue/bug tracker:**
 <img width="1072" height="274" alt="Captura de tela 2026-05-17 231203" src="https://github.com/user-attachments/assets/d7ac0f48-f7e1-47bf-81f5-ee64d25c09bc" />
 
-### Como Clonar e Executar o Projeto
+## Como Clonar e Executar o Projeto:
 
-## Pré-requisitos
+### Pré-requisitos
 
 Antes de começar, certifique-se de ter instalado na sua máquina:
 
@@ -110,7 +110,7 @@ Antes de começar, certifique-se de ter instalado na sua máquina:
 
 ---
 
-## 1. Clonar o Repositório
+### 1. Clonar o Repositório
 
 Abra o terminal e execute:
 
@@ -136,7 +136,7 @@ arena.pe/
 
 ---
 
-## 2. Subir os Containers com Docker Compose
+### 2. Subir os Containers com Docker Compose
 
 Com o terminal na raiz do projeto (pasta `arena.pe`), execute:
 
@@ -162,7 +162,7 @@ docker compose up -d
 
 ---
 
-## 3. Acessar a Aplicação
+### 3. Acessar a Aplicação
 
 Após os containers subirem, acesse:
 
@@ -174,7 +174,7 @@ Após os containers subirem, acesse:
 
 ---
 
-## 4. Verificar o Status dos Containers
+### 4. Verificar o Status dos Containers
 
 Para checar se todos os serviços estão rodando corretamente:
 
@@ -207,7 +207,7 @@ docker compose logs -f mysql
 
 ---
 
-## 5. Parar os Containers
+### 5. Parar os Containers
 
 Para interromper a execução (mantendo os dados do banco):
 
@@ -225,7 +225,7 @@ docker compose down -v
 
 ---
 
-## 6. Informações do Banco de Dados
+### 6. Informações do Banco de Dados
 
 O banco MySQL é configurado automaticamente pelo Docker Compose com as seguintes credenciais:
 
@@ -240,7 +240,7 @@ O banco MySQL é configurado automaticamente pelo Docker Compose com as seguinte
 
 ---
 
-## 7. Solução de Problemas Comuns
+### 7. Solução de Problemas Comuns
 
 **Porta já em uso:**
 Se alguma das portas `3306`, `8080` ou `3000` já estiver ocupada, pare o serviço local que a usa ou edite o `docker-compose.yml` para mapear para portas diferentes.
@@ -257,7 +257,7 @@ Depois, reinicie a sessão do terminal.
 
 ---
 
-## Usuário ADMIN
+### Usuário ADMIN
 
 O sistema possui um usuário do tipo administrador padrão com as seguintes credenciais:
 
@@ -267,7 +267,7 @@ O sistema possui um usuário do tipo administrador padrão com as seguintes cred
 
 ---
 
-## Tecnologias dos Containers
+### Tecnologias dos Containers
 
 | Serviço | Imagem Docker |
 |---------|--------------|
