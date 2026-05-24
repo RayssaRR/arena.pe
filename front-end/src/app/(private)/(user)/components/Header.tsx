@@ -16,7 +16,7 @@ export default function Header() {
           <Link href="/event-discover" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Eventos
           </Link>
-          <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+          <Link href="/about" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Sobre
           </Link>
         </nav>
