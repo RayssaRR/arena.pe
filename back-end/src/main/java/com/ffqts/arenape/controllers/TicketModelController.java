@@ -46,8 +46,8 @@ public class TicketModelController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<TicketModel> updateTicketModel(
-            @PathVariable String id,
-            @RequestBody NewTicketModelForm form
+        @PathVariable String id,
+        @RequestBody NewTicketModelForm form
     ) {
         TicketModel ticketModel = ticketModelService.updateTicketModel(UUID.fromString(id), form);
         return ResponseEntity.ok(ticketModel);

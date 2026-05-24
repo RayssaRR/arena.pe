@@ -6,6 +6,7 @@ import com.ffqts.arenape.models.user.User;
 import com.ffqts.arenape.models.ticket.UserTicket;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,15 +21,25 @@ public class Event extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     UUID id;
 
+    @NotBlank(message = "Título é obrigatório")
+    @Size(min = 3, max = 150, message = "Título deve ter entre 3 e 150 caracteres")
     private String title;
+
+    @NotBlank(message = "Descrição é obrigatória")
+    @Size(min = 10, max = 1000, message = "Descrição deve ter entre 10 e 1000 caracteres")
     private String description;
-    private LocalDateTime eventDate;
-    private Integer capacity;
-    private EventStatus status;
+
+    @NotNull(message = "Disponibilidade é obrigatória")
+    @Enumerated(EnumType.STRING)
+    private EventAvailability availability = EventAvailability.AVAILABLE;
+
+    @NotBlank(message = "URL da imagem é obrigatória")
+    @Size(min = 5, max = 500, message = "URL da imagem deve ter entre 5 e 500 caracteres")
     private String imageUrl;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull(message = "Criador do evento é obrigatório")
     private User creator;
 
     @ManyToOne
@@ -53,9 +64,6 @@ public class Event extends BaseEntity {
     ) {
         this.title = title;
         this.description = description;
-        this.eventDate = eventDate;
-        this.capacity = capacity;
-        this.status = EventStatus.UPCOMING;
         this.creator = creator;
         this.imageUrl = imageUrl;
         this.category = category;
@@ -85,28 +93,12 @@ public class Event extends BaseEntity {
         this.description = description;
     }
 
-    public LocalDateTime getEventDate() {
-        return eventDate;
+    public EventAvailability getAvailability() {
+        return availability;
     }
 
-    public void setEventDate(LocalDateTime eventDate) {
-        this.eventDate = eventDate;
-    }
-
-    public Integer getCapacity() {
-        return capacity;
-    }
-
-    public void setCapacity(Integer capacity) {
-        this.capacity = capacity;
-    }
-
-    public EventStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(EventStatus status) {
-        this.status = status;
+    public void setAvailability(EventAvailability availability) {
+        this.availability = availability;
     }
 
     public String getImageUrl() {

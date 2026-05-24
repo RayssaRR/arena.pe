@@ -2,7 +2,6 @@ package com.ffqts.arenape.models.user;
 
 import com.ffqts.arenape.models.BaseEntity;
 import com.ffqts.arenape.models.event.Event;
-import com.ffqts.arenape.models.visit.VisitBooking;
 import com.ffqts.arenape.models.ticket.UserTicket;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -56,10 +55,6 @@ public class User extends BaseEntity implements UserDetails {
 
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VisitBooking> visitBookings = new ArrayList<>();
-
-    @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTicket> userTickets = new ArrayList<>();
 
     @Override
@@ -81,9 +76,7 @@ public class User extends BaseEntity implements UserDetails {
     public void setName(String name) {
         this.name = name;
     }
-    public String getEmail() {
-        return email;
-    }
+    public String getEmail() { return email; }
     public void setEmail(String email) {
         this.email = email;
     }
@@ -99,8 +92,6 @@ public class User extends BaseEntity implements UserDetails {
     public void setRole(Role role) { this.role = role; }
     public List<Event> getCreatedEvents() { return createdEvents; }
     public void setCreatedEvents(List<Event> createdEvents) { this.createdEvents = createdEvents; }
-    public List<VisitBooking> getVisitBookings() { return visitBookings; }
-    public void setVisitBookings(List<VisitBooking> visitBookings) { this.visitBookings = visitBookings; }
     public List<UserTicket> getUserTickets() { return userTickets; }
     public void setUserTickets(List<UserTicket> userTickets) { this.userTickets = userTickets; }
 }

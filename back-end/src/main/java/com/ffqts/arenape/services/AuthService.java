@@ -41,7 +41,7 @@ public class AuthService {
         var auth = this.authenticationManager.authenticate(usernamePassword);
         var user = ((User) auth.getPrincipal());
         var token = JwtUtil.generateToken(user.getEmail(), user.getRole().toString(), user.getName());
-        return new LoginResponse(token, user.getRole().toString());
+        return new LoginResponse(token);
     }
 
     public void promotesUser(String email) {
