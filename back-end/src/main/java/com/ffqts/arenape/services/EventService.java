@@ -99,10 +99,6 @@ public class EventService {
             throw new IllegalArgumentException("A data do evento não pode ser no passado");
         }
 
-        if (newEventForm.capacity() <= 0) {
-            throw new IllegalArgumentException("A capacidade deve ser maior que zero");
-        }
-
         var creator = userRepository.findUserByEmail(creatorEmail)
             .orElseThrow(() -> new IllegalArgumentException("Organizador não encontrado"));
 
