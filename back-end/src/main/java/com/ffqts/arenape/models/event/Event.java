@@ -1,10 +1,15 @@
-package com.ffqts.arenape.models;
+package com.ffqts.arenape.models.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ffqts.arenape.models.BaseEntity;
+import com.ffqts.arenape.models.user.User;
+import com.ffqts.arenape.models.ticket.UserTicket;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,7 +24,6 @@ public class Event extends BaseEntity {
     private String description;
     private LocalDateTime eventDate;
     private Integer capacity;
-    private Integer ticketsSold;
     private EventStatus status;
     private String imageUrl;
 
@@ -31,6 +35,10 @@ public class Event extends BaseEntity {
     @Nullable
     private Category category;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTicket> userTickets = new ArrayList<>();
+
     public Event() {
     }
 
@@ -41,13 +49,12 @@ public class Event extends BaseEntity {
         Integer capacity,
         User creator,
         String imageUrl,
-       Category category
+        Category category
     ) {
         this.title = title;
         this.description = description;
         this.eventDate = eventDate;
         this.capacity = capacity;
-        this.ticketsSold = 0;
         this.status = EventStatus.UPCOMING;
         this.creator = creator;
         this.imageUrl = imageUrl;
@@ -94,14 +101,6 @@ public class Event extends BaseEntity {
         this.capacity = capacity;
     }
 
-    public Integer getTicketsSold() {
-        return ticketsSold;
-    }
-
-    public void setTicketsSold(Integer ticketsSold) {
-        this.ticketsSold = ticketsSold;
-    }
-
     public EventStatus getStatus() {
         return status;
     }
@@ -128,5 +127,13 @@ public class Event extends BaseEntity {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public List<UserTicket> getUserTickets() {
+        return userTickets;
+    }
+
+    public void setUserTickets(List<UserTicket> userTickets) {
+        this.userTickets = userTickets;
     }
 }

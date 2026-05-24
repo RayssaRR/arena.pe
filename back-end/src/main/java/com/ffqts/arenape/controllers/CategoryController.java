@@ -1,6 +1,6 @@
 package com.ffqts.arenape.controllers;
 
-import com.ffqts.arenape.models.Category;
+import com.ffqts.arenape.models.event.Category;
 import com.ffqts.arenape.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

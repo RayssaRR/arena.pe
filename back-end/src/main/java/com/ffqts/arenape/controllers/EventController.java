@@ -2,8 +2,8 @@ package com.ffqts.arenape.controllers;
 
 import com.ffqts.arenape.controllers.dto.event.NewEventForm;
 import com.ffqts.arenape.controllers.utils.GetEmailFromTokenRequest;
-import com.ffqts.arenape.models.Event;
-import com.ffqts.arenape.models.EventStatus;
+import com.ffqts.arenape.models.event.Event;
+import com.ffqts.arenape.models.event.EventStatus;
 import com.ffqts.arenape.services.EventService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;

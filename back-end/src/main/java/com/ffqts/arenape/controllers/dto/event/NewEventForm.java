@@ -1,9 +1,8 @@
 package com.ffqts.arenape.controllers.dto.event;
 
-import com.ffqts.arenape.models.EventStatus;
+import com.ffqts.arenape.models.event.EventStatus;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public record NewEventForm(
     String title,

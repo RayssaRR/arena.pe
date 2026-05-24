@@ -1,4 +1,4 @@
-package com.ffqts.arenape.models;
+package com.ffqts.arenape.models.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nullable;

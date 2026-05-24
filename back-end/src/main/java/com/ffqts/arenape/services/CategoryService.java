@@ -1,5 +1,5 @@
 package com.ffqts.arenape.services;
-import com.ffqts.arenape.models.Category;
+import com.ffqts.arenape.models.event.Category;
 import com.ffqts.arenape.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

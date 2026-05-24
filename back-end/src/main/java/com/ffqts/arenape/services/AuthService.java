@@ -3,8 +3,8 @@ package com.ffqts.arenape.services;
 import com.ffqts.arenape.config.JwtUtil;
 import com.ffqts.arenape.controllers.dto.auth.RegisterForm;
 import com.ffqts.arenape.controllers.dto.auth.LoginResponse;
-import com.ffqts.arenape.models.RoleEnum;
-import com.ffqts.arenape.models.User;
+import com.ffqts.arenape.models.user.Role;
+import com.ffqts.arenape.models.user.User;
 import com.ffqts.arenape.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class AuthService {
     public void promotesUser(String email) {
         var user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-        user.setRole(RoleEnum.ADMIN);
+        user.setRole(Role.ADMIN);
         userRepository.save(user);
     }
 
