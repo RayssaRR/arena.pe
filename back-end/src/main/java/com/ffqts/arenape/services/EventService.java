@@ -113,7 +113,6 @@ public class EventService {
             newEventForm.title(),
             newEventForm.description(),
             newEventForm.eventDate(),
-            newEventForm.capacity(),
             creator,
             newEventForm.imageUrl(),
             category
@@ -139,8 +138,6 @@ public class EventService {
         currentEvent.setTitle(updatedEvent.title());
         currentEvent.setDescription(updatedEvent.description());
         currentEvent.setEventDate(updatedEvent.eventDate());
-        currentEvent.setCapacity(updatedEvent.capacity());
-        currentEvent.setStatus(updatedEvent.status());
         currentEvent.setImageUrl(updatedEvent.imageUrl());
     }
 }

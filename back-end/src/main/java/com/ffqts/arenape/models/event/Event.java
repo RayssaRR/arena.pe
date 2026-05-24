@@ -29,9 +29,12 @@ public class Event extends BaseEntity {
     @Size(min = 10, max = 1000, message = "Descrição deve ter entre 10 e 1000 caracteres")
     private String description;
 
-    @NotNull(message = "Disponibilidade é obrigatória")
-    @Enumerated(EnumType.STRING)
-    private EventAvailability availability = EventAvailability.AVAILABLE;
+    @NotNull(message = "Data do evento é obrigatória")
+    @Future(message = "Data do evento deve ser no futuro")
+    private LocalDateTime eventDate;
+
+    @NotNull(message = "Status é obrigatório")
+    private EventStatus status;
 
     @NotBlank(message = "URL da imagem é obrigatória")
     @Size(min = 5, max = 500, message = "URL da imagem deve ter entre 5 e 500 caracteres")
@@ -57,16 +60,17 @@ public class Event extends BaseEntity {
         String title,
         String description,
         LocalDateTime eventDate,
-        Integer capacity,
         User creator,
         String imageUrl,
         Category category
     ) {
         this.title = title;
         this.description = description;
+        this.eventDate = eventDate;
         this.creator = creator;
         this.imageUrl = imageUrl;
         this.category = category;
+        this.status = EventStatus.UPCOMING;
     }
 
     public UUID getId() {
@@ -93,12 +97,20 @@ public class Event extends BaseEntity {
         this.description = description;
     }
 
-    public EventAvailability getAvailability() {
-        return availability;
+    public LocalDateTime getEventDate() {
+        return eventDate;
     }
 
-    public void setAvailability(EventAvailability availability) {
-        this.availability = availability;
+    public void setEventDate(LocalDateTime eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    public EventStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(EventStatus status) {
+        this.status = status;
     }
 
     public String getImageUrl() {
