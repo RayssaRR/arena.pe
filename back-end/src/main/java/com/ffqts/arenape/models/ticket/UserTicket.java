@@ -29,12 +29,15 @@ public class UserTicket extends BaseEntity {
     @NotNull(message = "Modelo de ticket é obrigatório")
     private TicketModel ticketModel;
 
+    private boolean isValid;
+
     public UserTicket() {}
 
     public UserTicket(User user, TicketModel ticketModel, Event event) {
         this.user = user;
         this.event = event;
         this.ticketModel = ticketModel;
+        this.isValid = true;
     }
 
     public UUID getId() { return id; }
@@ -44,5 +47,7 @@ public class UserTicket extends BaseEntity {
     public TicketModel getTicketModel() { return ticketModel; }
     public void setTicketModel(TicketModel ticketModel) { this.ticketModel = ticketModel; }
     public void setUser(User user) { this.user = user; }
+    public boolean getIsValid() { return isValid; }
+    public void setIsValid(boolean isValid) { this.isValid = isValid; }
 
 }
