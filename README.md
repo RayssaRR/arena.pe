@@ -26,7 +26,7 @@ A plataforma permite que cidadãos descubram eventos, reservem ingressos e agend
 
 ### Banco de Dados
 
-- MySQL 
+- PostgreSQL 
 
 ## Arquitetura
 
@@ -146,7 +146,7 @@ docker compose up
 
 O Docker irá baixar as imagens necessárias e iniciar os três serviços na seguinte ordem:
 
-1. **MySQL** (`arena_mysql`) — banco de dados na porta `3306`
+1. **Postgres** (`arena_postgres`) — banco de dados na porta `5432`
 2. **Back-end** (`arena_backend`) — API Spring Boot na porta `8080`
 3. **Front-end** (`arena_frontend`) — aplicação React na porta `3000`
 
@@ -168,9 +168,9 @@ Após os containers subirem, acesse:
 
 | Serviço | Endereço |
 |---------|----------|
-| **Front-end (interface web)** | http://localhost:3000 |
-| **Back-end (API REST)** | http://localhost:8080 |
-| **Banco de dados MySQL** | `localhost:3306` |
+| **Front-end (interface web)** | `http://localhost:3000` |
+| **Back-end (API REST)** | `http://localhost:8080` |
+| **Banco de dados Postgres** | `localhost:5432` |
 
 ---
 
@@ -186,7 +186,7 @@ Você verá uma saída parecida com:
 
 ```
 NAME              IMAGE                          STATUS
-arena_mysql       mysql:8.4                      Up (healthy)
+arena_postgres    postgres:16-alpine             Up (healthy)
 arena_backend     maven:3.9-eclipse-temurin-25   Up
 arena_frontend    node:22-alpine                 Up
 ```
@@ -202,7 +202,7 @@ Para ver os logs de um serviço específico:
 ```bash
 docker compose logs -f back-end
 docker compose logs -f front-end
-docker compose logs -f mysql
+docker compose logs -f postgres
 ```
 
 ---
@@ -227,12 +227,12 @@ docker compose down -v
 
 ### 6. Informações do Banco de Dados
 
-O banco MySQL é configurado automaticamente pelo Docker Compose com as seguintes credenciais:
+O banco PostgreSQL é configurado automaticamente pelo Docker Compose com as seguintes credenciais:
 
 | Campo | Valor |
 |-------|-------|
 | Host | `localhost` |
-| Porta | `3306` |
+| Porta | `5432` |
 | Banco | `arena` |
 | Usuário | `arena` |
 | Senha | `arena123` |
@@ -243,10 +243,10 @@ O banco MySQL é configurado automaticamente pelo Docker Compose com as seguinte
 ### 7. Solução de Problemas Comuns
 
 **Porta já em uso:**
-Se alguma das portas `3306`, `8080` ou `3000` já estiver ocupada, pare o serviço local que a usa ou edite o `docker-compose.yml` para mapear para portas diferentes.
+Se alguma das portas `5432`, `8080` ou `3000` já estiver ocupada, pare o serviço local que a usa ou edite o `docker-compose.yml` para mapear para portas diferentes.
 
 **Back-end não conecta ao banco:**
-O back-end aguarda o MySQL estar saudável (`healthcheck`) antes de iniciar. Se o banco demorar para subir, o Spring Boot pode tentar reconectar automaticamente. Aguarde alguns instantes ou reinicie com `docker compose restart back-end`.
+O back-end aguarda o Postgres estar saudável (`healthcheck`) antes de iniciar. Se o banco demorar para subir, o Spring Boot pode tentar reconectar automaticamente. Aguarde alguns instantes ou reinicie com `docker compose restart back-end`.
 
 **Permissão negada no Docker (Linux):**
 Adicione seu usuário ao grupo `docker`:
@@ -271,7 +271,7 @@ O sistema possui um usuário do tipo administrador padrão com as seguintes cred
 
 | Serviço | Imagem Docker |
 |---------|--------------|
-| Banco de dados | `mysql:8.4` |
+| Banco de dados | `postgres:16-alpine` |
 | Back-end | `maven:3.9-eclipse-temurin-25` |
 | Front-end | `node:22-alpine` |
 
