@@ -18,8 +18,8 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<TicketModel> createReservation(
-            @RequestBody NewReservationForm form,
-            HttpServletRequest req
+        @RequestBody NewReservationForm form,
+        HttpServletRequest req
     ) {
         var email = GetEmailFromTokenRequest.get(req);
         reservationService.assignTickets(form, email);

@@ -12,5 +12,5 @@ public enum TicketLocation {
     SUPERIOR_OESTE,
 
     DECK_PREMIUM,
-    GRAMADOS
+    GRAMADO
 }

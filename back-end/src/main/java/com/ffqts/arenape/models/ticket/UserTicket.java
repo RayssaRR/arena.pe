@@ -4,6 +4,7 @@ import com.ffqts.arenape.models.BaseEntity;
 import com.ffqts.arenape.models.event.Event;
 import com.ffqts.arenape.models.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.UUID;
 
 @Entity
@@ -16,13 +17,16 @@ public class UserTicket extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
+    @NotNull(message = "Usuário é obrigatório")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", nullable = false)
+    @NotNull(message = "Evento é obrigatório")
     private Event event;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull(message = "Modelo de ticket é obrigatório")
     private TicketModel ticketModel;
 
     public UserTicket() {}

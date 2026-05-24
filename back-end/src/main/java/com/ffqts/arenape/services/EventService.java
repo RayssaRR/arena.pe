@@ -28,12 +28,7 @@ public class EventService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Autowired
-    private AuthService authService;
-
-    public List<Event> getAllEvents() {
-        return eventRepository.findAll();
-    }
+    public List<Event> getAllEvents() { return eventRepository.findAll(); }
 
     public List<Event> getFilteredEvents(
             String title,
@@ -56,7 +51,7 @@ public class EventService {
 
         if (categoryId != null) {
             categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
         }
 
         List<Event> todos = eventRepository.findAll();
@@ -67,8 +62,8 @@ public class EventService {
             if (event.getStatus() == EventStatus.CANCELED) continue;
 
             EventStatus computed = now.isBefore(event.getEventDate())
-                    ? EventStatus.UPCOMING
-                    : EventStatus.COMPLETED;
+                ? EventStatus.UPCOMING
+                : EventStatus.COMPLETED;
 
             if (event.getStatus() != computed) {
                 event.setStatus(computed);
@@ -81,18 +76,18 @@ public class EventService {
         }
 
         return eventRepository.findWithFilters(
-                title,
-                status,
-                categoryId,
-                date,
-                normalizedOrderBy,
-                normalizedDirection
+            title,
+            status,
+            categoryId,
+            date,
+            normalizedOrderBy,
+            normalizedDirection
         );
     }
 
     public Event getEventById(String eventId) {
         return eventRepository.findById(UUID.fromString(eventId))
-                .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
+            .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
     }
 
     public Event createEvent(NewEventForm newEventForm, String creatorEmail) {
@@ -109,16 +104,15 @@ public class EventService {
         }
 
         var creator = userRepository.findUserByEmail(creatorEmail)
-                .orElseThrow(() -> new IllegalArgumentException("Organizador não encontrado"));
+            .orElseThrow(() -> new IllegalArgumentException("Organizador não encontrado"));
 
         Category category = categoryRepository.findById(newEventForm.categoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
+            .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
 
         Event newEvent = new Event(
             newEventForm.title(),
             newEventForm.description(),
             newEventForm.eventDate(),
-            newEventForm.capacity(),
             creator,
             newEventForm.imageUrl(),
             category
@@ -144,8 +138,6 @@ public class EventService {
         currentEvent.setTitle(updatedEvent.title());
         currentEvent.setDescription(updatedEvent.description());
         currentEvent.setEventDate(updatedEvent.eventDate());
-        currentEvent.setCapacity(updatedEvent.capacity());
-        currentEvent.setStatus(updatedEvent.status());
         currentEvent.setImageUrl(updatedEvent.imageUrl());
     }
 }
