@@ -118,8 +118,17 @@ export default function Home() {
 
       <main className="p-8">
         {/* Hero */}
-        <section className="bg-black/70 text-white p-10 rounded-3xl h-[50vh] flex flex-col items-center justify-center gap-5 shadow-xl text-center">
-          <div className="space-y-2">
+        <section
+          className="relative text-white p-10 rounded-3xl h-[65vh] flex flex-col items-center justify-center gap-5 shadow-xl text-center overflow-hidden"
+          style={{
+            backgroundImage: "url('/ArenaPernambuco1.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom",
+          }}
+        >
+          <div className="absolute inset-0 bg-black/55 rounded-3xl" />
+
+          <div className="relative z-10 space-y-2">
             <h2 className="title-h1 text-white">
               O coração da ação em Pernambuco
             </h2>
@@ -128,18 +137,18 @@ export default function Home() {
               exclusivos na Arena Pernambuco.
             </p>
           </div>
-          <SearchBar onSearch={setSearchTerm} />
+          <div className="relative z-10 w-full max-w-xl">
+            <SearchBar onSearch={setSearchTerm} />
+          </div>
         </section>
 
         {/* Content */}
         <div className="grid grid-cols-4 gap-8 mt-8 items-start">
 
-          {/* Sidebar categorias */}
           <section className="col-span-1 flex flex-col gap-4 mt-8">
             <Category value={selectedCategory} onChange={setSelectedCategory} />
           </section>
 
-          {/* Eventos */}
           <section className="col-span-3">
             <h3 className="title-h3">Próximos Eventos</h3>
 

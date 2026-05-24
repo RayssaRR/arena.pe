@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import HomeCard from "../components/HomeCard";
 import RecentEventsCard from "../components/RecentEventsCard";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { getEvents, EventResponse } from "@/lib/api";
 import { getUserNameFromToken } from "@/lib/jwt-utils";
+import { Calendar, Ticket, CircleDollarSign } from "lucide-react";
 
 export default function AdminDashboard() {
   const [events, setEvents] = useState<EventResponse[]>([]);
@@ -23,9 +22,7 @@ export default function AdminDashboard() {
     const loadEvents = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        if (!token) {
-          throw new Error("Token não encontrado");
-        }
+        if (!token) throw new Error("Token não encontrado");
         const data = await getEvents(token);
         setEvents(data);
       } catch (err) {
@@ -40,12 +37,10 @@ export default function AdminDashboard() {
   }, []);
 
   const handleDeleteEvent = (eventId: string) => {
-    // TODO: Implementar função de delete
     console.log("Deletar evento:", eventId);
   };
 
   const handleEditEvent = (eventId: string) => {
-    // TODO: Implementar função de edição
     console.log("Editar evento:", eventId);
   };
 
@@ -53,20 +48,31 @@ export default function AdminDashboard() {
     <main className="p-8 min-h-screen">
       {/* Welcome Section */}
       <div className="space-y-1 mb-8">
-        <h1 className="title-h1">
-          Bem vindo de volta, {userName}!
-        </h1>
-        <p className="subtitle">
-          Veja o que está acontecendo com seus eventos hoje.
-        </p>
+        <h1 className="title-h1">Bem vindo de volta, {userName}!</h1>
+        <p className="subtitle">Veja o que está acontecendo com seus eventos hoje.</p>
       </div>
 
       {/* Estatísticas */}
       <section>
         <div className="flex gap-5 mt-7">
-          <HomeCard />
-          <HomeCard />
-          <HomeCard />
+          <HomeCard
+            icon={Calendar}
+            label="Total de Eventos"
+            value={24}
+            description="4 eventos acontecendo ao vivo neste momento"
+          />
+          <HomeCard
+            icon={Ticket}
+            label="Ingressos Vendidos"
+            value="1.284"
+            description="156 ingressos vendidos esta semana"
+          />
+          <HomeCard
+            icon={CircleDollarSign}
+            label="Receita Total"
+            value="R$ 45.200"
+            description="R$ 2.450 em processamento de pagamentos"
+          />
         </div>
       </section>
 
