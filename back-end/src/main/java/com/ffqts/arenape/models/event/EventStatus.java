@@ -1,4 +1,4 @@
-package com.ffqts.arenape.models;
+package com.ffqts.arenape.models.event;
 
 public enum EventStatus {
     UPCOMING,

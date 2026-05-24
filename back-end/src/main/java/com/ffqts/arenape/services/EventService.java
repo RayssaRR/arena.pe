@@ -1,7 +1,9 @@
 package com.ffqts.arenape.services;
 
 import com.ffqts.arenape.controllers.dto.event.NewEventForm;
-import com.ffqts.arenape.models.*;
+import com.ffqts.arenape.models.event.Category;
+import com.ffqts.arenape.models.event.Event;
+import com.ffqts.arenape.models.event.EventStatus;
 import com.ffqts.arenape.repositories.CategoryRepository;
 import com.ffqts.arenape.repositories.EventRepository;
 import com.ffqts.arenape.repositories.UserRepository;
@@ -147,3 +149,4 @@ public class EventService {
         currentEvent.setImageUrl(updatedEvent.imageUrl());
     }
 }
+

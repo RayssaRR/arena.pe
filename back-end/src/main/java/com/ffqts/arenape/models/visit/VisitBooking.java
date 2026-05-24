@@ -1,6 +1,8 @@
-package com.ffqts.arenape.models;
+package com.ffqts.arenape.models.visit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ffqts.arenape.models.BaseEntity;
+import com.ffqts.arenape.models.user.User;
 import jakarta.persistence.*;
 
 @Entity

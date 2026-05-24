@@ -1,7 +1,7 @@
 package com.ffqts.arenape.repositories;
 
-import com.ffqts.arenape.models.Event;
-import com.ffqts.arenape.models.EventStatus;
+import com.ffqts.arenape.models.event.Event;
+import com.ffqts.arenape.models.event.EventStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,11 +22,11 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
             AND (:date IS NULL OR CAST(e.eventDate AS date) = :date)
         ORDER BY 
             CASE WHEN :orderBy = 'eventDate' AND :direction = 'asc' THEN e.eventDate END ASC,
-            CASE WHEN :orderBy = 'eventDate' AND :direction = 'desc' THEN e.eventDate END ASC,
+            CASE WHEN :orderBy = 'eventDate' AND :direction = 'desc' THEN e.eventDate END DESC,
             CASE WHEN :orderBy = 'title' AND :direction = 'asc' THEN e.title END ASC,
-            CASE WHEN :orderBy = 'title' AND :direction = 'desc' THEN e.title END ASC,
-            CASE WHEN :orderBy = 'popularity' AND :direction = 'asc' THEN e.ticketsSold END ASC,
-            CASE WHEN :orderBy = 'popularity' AND :direction = 'desc' THEN e.ticketsSold END ASC,
+            CASE WHEN :orderBy = 'title' AND :direction = 'desc' THEN e.title END DESC,
+            CASE WHEN :orderBy = 'popularity' AND :direction = 'asc' THEN (SELECT COUNT(ut) FROM UserTicket ut WHERE ut.event.id = e.id) END ASC,
+            CASE WHEN :orderBy = 'popularity' AND :direction = 'desc' THEN (SELECT COUNT(ut) FROM UserTicket ut WHERE ut.event.id = e.id) END DESC,
             e.eventDate ASC
     """)
     List<Event> findWithFilters(

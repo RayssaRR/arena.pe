@@ -3,7 +3,7 @@ package com.ffqts.arenape.controllers;
 import com.ffqts.arenape.controllers.dto.auth.LoginRequest;
 import com.ffqts.arenape.controllers.dto.auth.LoginResponse;
 import com.ffqts.arenape.controllers.dto.auth.RegisterForm;
-import com.ffqts.arenape.models.User;
+import com.ffqts.arenape.models.user.User;
 import com.ffqts.arenape.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;

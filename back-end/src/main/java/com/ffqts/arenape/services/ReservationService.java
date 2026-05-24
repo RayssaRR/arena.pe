@@ -1,11 +1,13 @@
 package com.ffqts.arenape.services;
 
 import com.ffqts.arenape.controllers.dto.reservation.NewReservationForm;
-import com.ffqts.arenape.models.EventStatus;
-import com.ffqts.arenape.models.Reservation;
+import com.ffqts.arenape.models.event.EventStatus;
+import com.ffqts.arenape.models.ticket.UserTicket;
 import com.ffqts.arenape.repositories.EventRepository;
-import com.ffqts.arenape.repositories.ReservationRepository;
+import com.ffqts.arenape.repositories.TicketModelRepository;
 import com.ffqts.arenape.repositories.UserRepository;
+import com.ffqts.arenape.repositories.UserTicketRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +15,10 @@ import org.springframework.stereotype.Service;
 public class ReservationService {
 
     @Autowired
-    private ReservationRepository reservationRepository;
+    private TicketModelRepository ticketModelRepository;
+
+    @Autowired
+    private UserTicketRepository userTicketRepository;
 
     @Autowired
     private EventRepository eventRepository;
@@ -21,12 +26,16 @@ public class ReservationService {
     @Autowired
     private UserRepository userRepository;
 
-    public Reservation createReservation(NewReservationForm form, String userEmail) {
+    @Transactional
+    public void assignTickets(NewReservationForm form, String userEmail) {
 
         var user = userRepository.findUserByEmail(userEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
-        var event = eventRepository.findById(form.eventId())
+        var ticketModel = ticketModelRepository.findById(form.ticketModelId())
+                .orElseThrow(() -> new IllegalArgumentException("Modelo de ingresso não encontrado"));
+
+        var event = eventRepository.findById(ticketModel.getEvent().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
 
         if (event.getStatus() != EventStatus.UPCOMING) {
@@ -37,18 +46,17 @@ public class ReservationService {
             throw new IllegalArgumentException("A quantidade de ingressos deve ser maior que zero");
         }
 
-
-        int disponivel = event.getCapacity() - event.getTicketsSold();
+        int disponivel = ticketModel.getTicketsAvailable() - userTicketRepository.countByTicketModel_Id(ticketModel.getId());
         if (form.quantity() > disponivel) {
             throw new IllegalArgumentException(
                     "Quantidade solicitada (" + form.quantity() + ") excede as vagas disponíveis (" + disponivel + ")"
             );
         }
 
-        event.setTicketsSold(event.getTicketsSold() + form.quantity());
-        eventRepository.save(event);
+        for (int i = 0; i < form.quantity(); i++) {
+            var userTicket = new UserTicket(user, ticketModel, event);
+            userTicketRepository.save(userTicket);
+        }
 
-        var reservation = new Reservation(event, user, form.quantity());
-        return reservationRepository.save(reservation);
     }
 }

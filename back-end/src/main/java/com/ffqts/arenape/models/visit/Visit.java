@@ -1,6 +1,7 @@
-package com.ffqts.arenape.models;
+package com.ffqts.arenape.models.visit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ffqts.arenape.models.BaseEntity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -16,9 +17,6 @@ public class Visit extends BaseEntity {
     private Long id;
 
     private LocalDateTime date;
-
-    @Enumerated(EnumType.STRING)
-    private Shift shift;
 
     private int maxVisitors;
 
@@ -36,14 +34,6 @@ public class Visit extends BaseEntity {
 
     public void setDate(LocalDateTime date) {
         this.date = date;
-    }
-
-    public Shift getShift() {
-        return shift;
-    }
-
-    public void setShift(Shift shift) {
-        this.shift = shift;
     }
 
     public int getMaxVisitors() {

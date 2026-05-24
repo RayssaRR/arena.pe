@@ -1,6 +1,7 @@
 package com.ffqts.arenape.services;
 
-import com.ffqts.arenape.models.*;
+import com.ffqts.arenape.models.visit.VisitBooking;
+import com.ffqts.arenape.models.visit.VisitBookingStatus;
 import com.ffqts.arenape.repositories.UserRepository;
 import com.ffqts.arenape.repositories.VisitBookingRepository;
 import com.ffqts.arenape.repositories.VisitRepository;

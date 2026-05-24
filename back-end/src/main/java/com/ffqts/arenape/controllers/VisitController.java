@@ -2,7 +2,7 @@ package com.ffqts.arenape.controllers;
 
 import com.ffqts.arenape.controllers.dto.visit.NewVisitForm;
 import com.ffqts.arenape.controllers.utils.GetEmailFromTokenRequest;
-import com.ffqts.arenape.models.Visit;
+import com.ffqts.arenape.models.visit.Visit;
 import com.ffqts.arenape.services.VisitBookingService;
 import com.ffqts.arenape.services.VisitService;
 import jakarta.servlet.http.HttpServletRequest;
