@@ -1,19 +1,18 @@
 services:
-  mysql:
-    image: mysql:8.4
-    container_name: arena_mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: arena_postgres
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: arena
-      MYSQL_USER: arena
-      MYSQL_PASSWORD: arena123
+      POSTGRES_DB: arena
+      POSTGRES_USER: arena
+      POSTGRES_PASSWORD: arena123
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD-SHELL", "pg_isready -U arena -d arena"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -28,16 +27,16 @@ services:
       - maven_cache:/root/.m2
       - uploads_data:/app/uploads
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/arena
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arena
       SPRING_DATASOURCE_USERNAME: arena
       SPRING_DATASOURCE_PASSWORD: arena123
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
       APP_UPLOAD_DIR: /app/uploads
     ports:
       - "8080:8080"
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
 
 
@@ -55,7 +54,7 @@ services:
   #     - back-end
 
 volumes:
-  mysql_data:
+  postgres_data:
   maven_cache:
   uploads_data:
   frontend_node_modules:
