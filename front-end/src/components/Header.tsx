@@ -123,7 +123,7 @@ export function Header() {
           <Link href="/event-discover" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Eventos
           </Link>
-          <a href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+          <a href="about" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Sobre
           </a>
         </nav>

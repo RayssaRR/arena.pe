@@ -3,37 +3,39 @@ import { useState } from "react";
 import Overview from "./Overview";
 import Location from "./Location";
 
-export default function Details(){
-    const [type, setType] = useState<"overview" | "location">("overview");
+interface DetailsProps {
+  description?: string;
+}
 
-    const tabClass = (active: boolean) =>
+export default function Details({ description }: DetailsProps) {
+  const [type, setType] = useState<"overview" | "location">("overview");
+
+  const tabClass = (active: boolean) =>
     `font-bold transition ${
       active
-        ? " text-(--blue) "
+        ? "text-(--blue)"
         : "text-gray-600 hover:text-black cursor-pointer"
     }`;
-    
-    return(
-        <>
-            <div className="flex gap-10">
-                <button
-                    onClick={() => setType("overview")}
-                    className={tabClass(type === "overview")}
-                >
-                    Visão Geral
-                </button>
-                <button
-                    onClick={() => setType("location")}
-                    className={tabClass(type === "location")}
-                >
-                    Localização
-                </button>
-            </div>
-            
 
-            {/* Conteúdo */}
-                {type === "overview" && <Overview/>}
-                {type === "location" && <Location/>}
-        </>
-    )
+  return (
+    <>
+      <div className="flex gap-10">
+        <button
+          onClick={() => setType("overview")}
+          className={tabClass(type === "overview")}
+        >
+          Visão Geral
+        </button>
+        <button
+          onClick={() => setType("location")}
+          className={tabClass(type === "location")}
+        >
+          Localização
+        </button>
+      </div>
+
+      {type === "overview" && <Overview description={description} />}
+      {type === "location" && <Location />}
+    </>
+  );
 }

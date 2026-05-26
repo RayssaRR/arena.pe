@@ -1,13 +1,14 @@
-export default function Overview(){
-    return(
-        <>
-            <h3 className="title-h3">Sobre o Evento</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            
-            Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius. 
-            </p>
-        </>
-    )
+interface OverviewProps {
+  description?: string;
+}
+
+export default function Overview({ description }: OverviewProps) {
+  return (
+    <>
+      <h3 className="title-h3">Sobre o Evento</h3>
+      <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+        {description ?? "Sem descrição disponível."}
+      </p>
+    </>
+  );
 }
