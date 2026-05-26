@@ -5,7 +5,9 @@ import RecentEventsCard from "../components/RecentEventsCard";
 import { useEffect, useState } from "react";
 import { getEvents, EventResponse } from "@/lib/api";
 import { getUserNameFromToken } from "@/lib/jwt-utils";
-import { Calendar, Ticket, CircleDollarSign } from "lucide-react";
+import { Calendar, Ticket, CircleDollarSign, Plus } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function AdminDashboard() {
   const [events, setEvents] = useState<EventResponse[]>([]);
@@ -14,16 +16,13 @@ export default function AdminDashboard() {
   const [userName, setUserName] = useState("Administrador");
 
   useEffect(() => {
-    const userName = getUserNameFromToken();
-    if (userName) {
-      setUserName(userName);
-    }
+    const name = getUserNameFromToken();
+    if (name) setUserName(name);
 
     const loadEvents = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-        if (!token) throw new Error("Token não encontrado");
-        const data = await getEvents(token);
+        // GET /events é público (permitAll), não precisa de token
+        const data = await getEvents();
         setEvents(data);
       } catch (err) {
         console.error("Erro ao carregar eventos:", err);
@@ -46,26 +45,24 @@ export default function AdminDashboard() {
 
   return (
     <main className="p-8 min-h-screen">
-      {/* Welcome Section */}
       <div className="space-y-1 mb-8">
         <h1 className="title-h1">Bem vindo de volta, {userName}!</h1>
         <p className="subtitle">Veja o que está acontecendo com seus eventos hoje.</p>
       </div>
 
-      {/* Estatísticas */}
       <section>
         <div className="flex gap-5 mt-7">
           <HomeCard
             icon={Calendar}
             label="Total de Eventos"
-            value={24}
-            description="4 eventos acontecendo ao vivo neste momento"
+            value={events.length || 0}
+            description={`${events.filter(e => e.status === "UPCOMING").length} eventos próximos`}
           />
           <HomeCard
             icon={Ticket}
             label="Ingressos Vendidos"
-            value="1.284"
-            description="156 ingressos vendidos esta semana"
+            value={events.reduce((acc, e) => acc + (e.ticketsSold ?? 0), 0).toLocaleString("pt-BR")}
+            description="Total de ingressos vendidos"
           />
           <HomeCard
             icon={CircleDollarSign}
@@ -76,9 +73,17 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* Eventos Recentes */}
       <section className="mt-10">
-        <h3 className="title-h3 mb-4">Eventos Recentes</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="title-h3">Eventos Recentes</h3>
+          <Link href="/events/register">
+            <Button className="bg-(--blue) cursor-pointer flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Criar Evento
+            </Button>
+          </Link>
+        </div>
+
         {isLoading ? (
           <div className="border rounded-2xl overflow-hidden p-8 text-center text-gray-500">
             <p>Carregando eventos...</p>

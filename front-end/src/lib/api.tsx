@@ -11,11 +11,8 @@ export async function postJson<TResponse = unknown, TPayload = unknown>(
   payload: TPayload,
 ): Promise<TResponse> {
   const { data } = await axios.post<TResponse>(url, payload, {
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
   });
-
   return data;
 }
 
@@ -30,7 +27,6 @@ export async function postJsonWithAuth<TResponse = unknown, TPayload = unknown>(
       Authorization: `Bearer ${token}`,
     },
   });
-
   return data;
 }
 
@@ -39,23 +35,16 @@ export async function getJsonWithAuth<TResponse = unknown>(
   token: string,
 ): Promise<TResponse> {
   const { data } = await axios.get<TResponse>(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
-
   return data;
 }
 
+// GET sem token e sem Content-Type (causa 403 em alguns servidores)
 export async function getJson<TResponse = unknown>(
   url: string,
 ): Promise<TResponse> {
-  const { data } = await axios.get<TResponse>(url, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
+  const { data } = await axios.get<TResponse>(url);
   return data;
 }
 
@@ -68,111 +57,78 @@ export async function uploadImageToPublicAssets(
 
   const response = await fetch(`${BACKEND_BASE_URL}/uploads`, {
     method: "POST",
-    headers: token
-      ? {
-          Authorization: `Bearer ${token}`,
-        }
-      : undefined,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     body: formData,
   });
 
-  if (!response.ok) {
-    throw new Error("Falha ao enviar imagem");
-  }
+  if (!response.ok) throw new Error("Falha ao enviar imagem");
 
   const payload: unknown = await response.json();
-  if (!payload || typeof payload !== "object") {
-    throw new Error("Resposta invalida do upload");
-  }
+  if (!payload || typeof payload !== "object") throw new Error("Resposta invalida do upload");
 
   const path = (payload as { path?: unknown }).path;
-  if (typeof path === "string" && path.trim()) {
-    return path;
-  }
+  if (typeof path === "string" && path.trim()) return path;
 
   const filename = (payload as { filename?: unknown }).filename;
-  if (typeof filename !== "string" || !filename.trim()) {
-    throw new Error("Resposta sem filename");
-  }
+  if (typeof filename !== "string" || !filename.trim()) throw new Error("Resposta sem filename");
 
   return `/uploads/${filename}`;
 }
 
 export function resolvePublicAssetUrl(assetPath?: string): string | null {
-  if (!assetPath) {
-    return null;
-  }
-
+  if (!assetPath) return null;
   const value = assetPath.trim();
-  if (!value) {
-    return null;
-  }
-
-  if (value.startsWith("http://") || value.startsWith("https://")) {
-    return value;
-  }
-
+  if (!value) return null;
+  if (value.startsWith("http://") || value.startsWith("https://")) return value;
   if (value.startsWith("/uploads/") || value.startsWith("/assets/uploads/")) {
     const normalizedPath = value.startsWith("/assets/uploads/")
       ? value.replace("/assets/uploads/", "/uploads/")
       : value;
-
     return `${BACKEND_BASE_URL}${normalizedPath}`;
   }
-
   return `${BACKEND_BASE_URL}/${value.replace(/^\/+/, "")}`;
 }
 
-// Auth types
-export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-}
+// ── Auth ───────────────────────────────────────────────────────────────────
 
-export interface RegisterResponse {
-  id?: string;
-  name: string;
-  email: string;
-}
+export interface RegisterRequest { name: string; email: string; password: string; }
+export interface RegisterResponse { id?: string; name: string; email: string; }
+export interface LoginRequest { email: string; password: string; }
+export interface LoginResponse { token: string; role: "ADMIN" | "CUSTOMER"; }
 
-export interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  token: string;
-  role: "ADMIN" | "CUSTOMER";
-}
-
-// Auth functions
 export async function register(payload: RegisterRequest): Promise<RegisterResponse> {
-  const url = `${BACKEND_BASE_URL}/auth/register`;
-  return postJson<RegisterResponse>(url, payload);
+  return postJson<RegisterResponse>(`${BACKEND_BASE_URL}/auth/register`, payload);
 }
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
-  const url = `${BACKEND_BASE_URL}/auth/login`;
-  return postJson<LoginResponse>(url, payload);
+  return postJson<LoginResponse>(`${BACKEND_BASE_URL}/auth/login`, payload);
 }
 
-// Event types
-export interface Category {
-  id: number;
-  title: string;
-  description?: string;
+// ── Categories ─────────────────────────────────────────────────────────────
+
+export interface Category { id: number; title: string; description?: string; }
+
+export async function getCategories(token?: string): Promise<Category[]> {
+  const url = `${BACKEND_BASE_URL}/categories`;
+  return token ? getJsonWithAuth<Category[]>(url, token) : getJson<Category[]>(url);
 }
+
+// ── Events ─────────────────────────────────────────────────────────────────
+
+export interface TicketSectorRequest { location: string; price: number; capacity: number; }
 
 export interface CreateEventRequest {
   title: string;
   description: string;
-  eventDate: string; // ISO 8601 format (2026-05-19T14:30:00)
+  eventDate: string;
   capacity: number;
   status: "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELED";
   imageUrl: string;
   categoryId: number;
+  ticketSectors?: TicketSectorRequest[];
 }
+
+export interface TicketSector { location: string; price: number; capacity: number; sold?: number; }
 
 export interface EventResponse {
   id: string;
@@ -184,29 +140,66 @@ export interface EventResponse {
   status: string;
   imageUrl: string;
   category?: Category;
+  ticketSectors?: TicketSector[];
 }
 
-// Event functions
-export async function getCategories(token?: string): Promise<Category[]> {
-  const url = `${BACKEND_BASE_URL}/categories`;
-  if (token) {
-    return getJsonWithAuth<Category[]>(url, token);
-  }
-  return getJson<Category[]>(url);
-}
-
-export async function createEvent(
-  payload: CreateEventRequest,
-  token: string
-): Promise<EventResponse> {
-  const url = `${BACKEND_BASE_URL}/events`;
-  return postJsonWithAuth<EventResponse>(url, payload, token);
+export async function createEvent(payload: CreateEventRequest, token: string): Promise<EventResponse> {
+  return postJsonWithAuth<EventResponse>(`${BACKEND_BASE_URL}/events`, payload, token);
 }
 
 export async function getEvents(token?: string): Promise<EventResponse[]> {
   const url = `${BACKEND_BASE_URL}/events`;
-  if (token) {
-    return getJsonWithAuth<EventResponse[]>(url, token);
-  }
-  return getJson<EventResponse[]>(url);
+  return token ? getJsonWithAuth<EventResponse[]>(url, token) : getJson<EventResponse[]>(url);
+}
+
+export async function getEventById(id: string): Promise<EventResponse> {
+  return getJson<EventResponse>(`${BACKEND_BASE_URL}/events/${id}`);
+}
+
+// ── Tickets / Reservations ─────────────────────────────────────────────────
+
+export interface UserTicketResponse {
+  ticketId: string;
+  eventTitle: string;
+  eventId: string;
+  ticketModelTitle: string;
+  price: number;
+  location: string;
+  isValid: boolean;
+  createdAt: string;
+}
+
+export interface PagedUserTickets {
+  content: UserTicketResponse[];
+  currentPage: number;
+  pageSize: number;
+  totalElements: number;
+  totalPages: number;
+  isLast: boolean;
+}
+
+export async function getUserTickets(
+  token: string,
+  page = 0,
+  pageSize = 10,
+  filterByValidity?: boolean
+): Promise<PagedUserTickets> {
+  const params = new URLSearchParams({
+    page: String(page),
+    pageSize: String(pageSize),
+    sortBy: "createdAt",
+    sortDirection: "desc",
+  });
+  if (filterByValidity !== undefined) params.append("filterByValidity", String(filterByValidity));
+  return getJsonWithAuth<PagedUserTickets>(`${BACKEND_BASE_URL}/reservation?${params}`, token);
+}
+
+export async function cancelTicket(ticketId: string, token: string): Promise<void> {
+  await axios.delete(`${BACKEND_BASE_URL}/reservation/${ticketId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function getTicketById(ticketId: string, token: string): Promise<UserTicketResponse> {
+  return getJsonWithAuth<UserTicketResponse>(`${BACKEND_BASE_URL}/reservation/${ticketId}`, token);
 }

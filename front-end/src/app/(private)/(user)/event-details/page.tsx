@@ -11,6 +11,13 @@ import Details from "../components/Details";
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
 
+type TicketSector = {
+  location: string;
+  price: number;
+  capacity: number;
+  sold?: number;
+};
+
 type Event = {
   id: string;
   title: string;
@@ -21,6 +28,7 @@ type Event = {
   status: string;
   imageUrl: string | null;
   category: { id: number; title: string } | null;
+  ticketSectors?: TicketSector[];
 };
 
 function formatDate(dateStr: string): string {
@@ -97,7 +105,7 @@ function LoadingState() {
 
 function EventDetailsContent() {
   const searchParams = useSearchParams();
-  const eventId = searchParams?.get('id');
+  const eventId = searchParams?.get("id");
   const router = useRouter();
 
   const [event, setEvent] = useState<Event | null>(null);
@@ -166,26 +174,19 @@ function EventDetailsContent() {
       <main className="p-8">
         {/* Hero */}
         <section className="relative rounded-3xl h-[50vh] overflow-hidden shadow-xl">
-          {/* Background Image */}
           {event.imageUrl && (
             <img
-              src={event.imageUrl.startsWith('/') ? BACKEND_URL + event.imageUrl : event.imageUrl}
+              src={event.imageUrl.startsWith("/") ? BACKEND_URL + event.imageUrl : event.imageUrl}
               alt={event.title}
               className="absolute inset-0 w-full h-full object-cover"
             />
           )}
-
-          {/* Overlay */}
           <div className="absolute inset-0 bg-black/70"></div>
-
-          {/* Content */}
           <div className="relative z-10 text-white p-10 h-full flex flex-col justify-end gap-3">
             <p className="bg-(--blue) p-1 rounded-full font-bold w-fit px-4">
               {event.category?.title ?? "Geral"}
             </p>
-
             <p className="title-h1 text-white">{event.title}</p>
-
             <div className="flex gap-10">
               <div className="flex gap-2">
                 <Calendar />
@@ -202,10 +203,15 @@ function EventDetailsContent() {
         {/* Detalhes + Comprar */}
         <section className="flex gap-10 py-7">
           <div className="w-full">
-            <Details />
+            <Details description={event.description} />
           </div>
           <div className="w-full">
-            <BuyTicketCard />
+            <BuyTicketCard
+              sectors={event.ticketSectors ?? []}
+              eventId={event.id}
+              eventTitle={event.title}
+              eventDate={event.eventDate}
+            />
           </div>
         </section>
 
