@@ -1,5 +1,6 @@
 package com.ffqts.arenape.controllers;
 
+import com.ffqts.arenape.controllers.dto.event.PagedUserEventsDTO;
 import com.ffqts.arenape.controllers.dto.reservation.NewReservationForm;
 import com.ffqts.arenape.controllers.dto.ticket.PagedUserTicketsDTO;
 import com.ffqts.arenape.controllers.dto.ticket.TicketCancellationResponseDTO;
@@ -113,4 +114,46 @@ public class ReservationController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/events/purchased")
+    public ResponseEntity<PagedUserEventsDTO> getUserPurchasedEvents(
+        HttpServletRequest req,
+        @RequestParam(required = false, defaultValue = "0") Integer page,
+        @RequestParam(required = false, defaultValue = "10") Integer pageSize
+    ) {
+        try {
+            var email = GetEmailFromTokenRequest.get(req);
+            PagedUserEventsDTO result = userTicketService.getUserPurchasedEvents(
+                email,
+                page,
+                pageSize
+            );
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/events/{eventId}/tickets")
+    public ResponseEntity<PagedUserTicketsDTO> getUserTicketsByEvent(
+        @PathVariable String eventId,
+        HttpServletRequest req,
+        @RequestParam(required = false, defaultValue = "0") Integer page,
+        @RequestParam(required = false, defaultValue = "10") Integer pageSize
+    ) {
+        try {
+            var email = GetEmailFromTokenRequest.get(req);
+            PagedUserTicketsDTO result = userTicketService.getUserTicketsByEvent(
+                email,
+                eventId,
+                page,
+                pageSize
+            );
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    
 }

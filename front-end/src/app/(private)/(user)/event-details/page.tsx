@@ -3,8 +3,6 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Calendar, MapPin } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import BuyTicketCard from "../components/BuyTicketCard";
 import Details from "../components/Details";
 import { getEventById, EventResponse, resolvePublicAssetUrl, ApiError } from "@/lib/api";
@@ -22,47 +20,6 @@ function formatDate(dateStr: string): string {
       minute: "2-digit",
     })
     .toUpperCase();
-}
-
-function formatDateShort(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date
-    .toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-    .toUpperCase();
-}
-
-function NextEventCard({ event }: { event: Event }) {
-  const router = useRouter();
-
-  return (
-    <Card className="mx-auto w-full pt-0">
-      <CardHeader className="bg-black/70 text-white p-5 min-h-20">
-        <p className="bg-white p-1 rounded-md text-(--blue) font-bold w-fit px-4 text-sm">
-          {event.category?.title ?? "Geral"}
-        </p>
-      </CardHeader>
-
-      <CardContent className="space-y-2 p-5">
-        <p className="text-(--blue) font-bold text-sm">{formatDateShort(event.eventDate)}</p>
-        <h4 className="body-lg font-semibold">{event.title}</h4>
-        <p className="text-(--gray) text-sm line-clamp-2">{event.description}</p>
-      </CardContent>
-
-      <CardFooter className="flex justify-end gap-5 bg-white p-5">
-        <Button
-          onClick={() => router.push(`/event-details?id=${event.id}`)}
-          className="bg-(--blue) hover:bg-(--blue-hover) cursor-pointer"
-        >
-          Detalhes
-        </Button>
-      </CardFooter>
-    </Card>
-  );
 }
 
 export default function EventDetails() {
@@ -112,6 +69,8 @@ function EventDetailsContent() {
         setError(null);
 
         const eventData = await getEventById(eventId!);
+        console.log(eventData);
+        
         setEvent(eventData);
 
       } catch (err) {
@@ -198,7 +157,6 @@ function EventDetailsContent() {
               sectors={
                 event.ticketSectors?.map((sector) => ({
                   id: sector.id,
-                  title: sector.title,
                   location: sector.location,
                   price: sector.price,
                   ticketsAvailable: sector.ticketsAvailable,

@@ -178,6 +178,7 @@ export interface TicketSector {
   location: string;
   price: number;
   ticketsAvailable: number;
+  ticketsSold: number;
 }
 
 export interface EventResponse {
@@ -187,7 +188,7 @@ export interface EventResponse {
   eventDate: string;
   imageUrl: string;
   category?: Category;
-  tickets?: TicketSector[];
+  ticketSectors?: TicketSector[];
 }
 
 export async function createEvent(payload: CreateEventRequest, token: string): Promise<EventResponse> {
@@ -219,10 +220,11 @@ export interface UserTicketResponse {
   ticketId: string;
   eventTitle: string;
   eventId: string;
-  ticketModelTitle: string;
+  eventDate: string;
+  eventStatus: "UPCOMING" | "ONGOING" | "FINISHED";
   price: number;
   location: string;
-  isValid: boolean;
+  ticketStatus: "VALIDO" | "RESGATADO" | "CANCELADO" | "EXPIRADO";
   createdAt: string;
 }
 

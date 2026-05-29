@@ -11,7 +11,6 @@ const TAX_RATE = 0.1667
 
 type TicketSector = {
   id: string;
-  title: string;
   location: string;
   price: number;
   ticketsAvailable: number;
@@ -71,7 +70,7 @@ export default function BuyTicketCard({ sectors = [], eventId, eventTitle, event
         total: String(total.toFixed(2)),
       })
 
-      router.push(`/ticket?${params.toString()}`)
+      router.push(`/dashboard-user`)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao processar compra")
     } finally {

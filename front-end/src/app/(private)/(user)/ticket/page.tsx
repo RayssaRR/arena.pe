@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, Download, Printer, MapPin, Tag, Users, Calendar } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
-import { getTicketById } from "@/lib/api"
+import { getTicketById, UserTicketResponse } from "@/lib/api"
 import { Header } from "@/components/Header"
 
 function formatDate(dateStr: string): string {
@@ -20,10 +20,29 @@ function formatDate(dateStr: string): string {
   })
 }
 
-function fmt(value: string | number): string {
-  const num = typeof value === "string" ? parseFloat(value) : value
-  if (isNaN(num)) return "R$ 0,00"
-  return num.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+function fmt(value: number): string {
+  if (isNaN(value)) return "R$ 0,00"
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+}
+
+function getTicketStatusLabel(status: string): string {
+  const statusMap: Record<string, string> = {
+    VALIDO: "Válido",
+    RESGATADO: "Resgatado",
+    CANCELADO: "Cancelado",
+    EXPIRADO: "Expirado",
+  }
+  return statusMap[status] || "Desconhecido"
+}
+
+function getTicketStatusColor(status: string): string {
+  const colorMap: Record<string, string> = {
+    VALIDO: "text-green-600",
+    RESGATADO: "text-blue-600",
+    CANCELADO: "text-red-600",
+    EXPIRADO: "text-gray-600",
+  }
+  return colorMap[status] || "text-gray-600"
 }
 
 function TicketContent() {
@@ -32,33 +51,38 @@ function TicketContent() {
   const ticketRef = useRef<HTMLDivElement>(null)
 
   const ticketId = searchParams?.get("ticketId") ?? ""
-  const eventTitle = searchParams?.get("eventTitle") ?? "Evento"
-  const eventDate = searchParams?.get("eventDate") ?? ""
-  const sectorLabel = searchParams?.get("sectorLabel") ?? ""
-  const quantity = searchParams?.get("quantity") ?? "1"
-  const total = searchParams?.get("total") ?? "0"
 
-  const [resolvedTicketId, setResolvedTicketId] = useState(ticketId)
+  const [ticket, setTicket] = useState<UserTicketResponse | null>(null)
   const [isLoading, setIsLoading] = useState(!!ticketId)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!ticketId) return
+
     async function fetchTicket() {
       try {
+        setIsLoading(true)
+        setError(null)
         const token = localStorage.getItem("authToken")
-        if (!token) return
-        const ticket = await getTicketById(ticketId, token)
-        setResolvedTicketId(ticket.ticketId)
-      } catch {
-        setResolvedTicketId(ticketId)
+        if (!token) {
+          setError("Não autorizado")
+          return
+        }
+        const ticketData = await getTicketById(ticketId, token)
+        setTicket(ticketData)
+      } catch (err) {
+        setError("Não foi possível carregar o ingresso")
+        console.error(err)
       } finally {
         setIsLoading(false)
       }
     }
+
     fetchTicket()
   }, [ticketId])
 
   const handlePrint = () => {
+    if (!ticket) return
     const printWindow = window.open("", "_blank", "width=600,height=800")
     if (!printWindow || !ticketRef.current) return
 
@@ -69,7 +93,7 @@ function TicketContent() {
       <html lang="pt-BR">
         <head>
           <meta charset="UTF-8" />
-          <title>Ingresso - ${eventTitle}</title>
+          <title>Ingresso - ${ticket.eventTitle}</title>
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: white; padding: 32px; display: flex; justify-content: center; }
@@ -95,8 +119,8 @@ function TicketContent() {
           <div class="ticket">
             <div class="ticket-header">
               <div class="venue">Arena Pernambuco</div>
-              <div class="title">${eventTitle}</div>
-              ${eventDate ? `<div class="date">${formatDate(eventDate)}</div>` : ""}
+              <div class="title">${ticket.eventTitle}</div>
+              <div class="date">${formatDate(ticket.eventDate)}</div>
             </div>
             <div class="divider"></div>
             <div class="ticket-body">
@@ -108,15 +132,15 @@ function TicketContent() {
                 </div>
                 <div class="field">
                   <label>Setor</label>
-                  <div class="value">${sectorLabel || "—"}</div>
+                  <div class="value">${ticket.location}</div>
                 </div>
                 <div class="field">
-                  <label>Quantidade</label>
-                  <div class="value">${quantity} ingresso${parseInt(quantity) > 1 ? "s" : ""}</div>
+                  <label>Preço</label>
+                  <div class="value">${fmt(ticket.price)}</div>
                 </div>
                 <div class="field">
-                  <label>Total pago</label>
-                  <div class="value">${fmt(total)}</div>
+                  <label>Status</label>
+                  <div class="value">${getTicketStatusLabel(ticket.ticketStatus)}</div>
                 </div>
               </div>
               <div class="qr-section">
@@ -133,12 +157,13 @@ function TicketContent() {
   }
 
   const handleDownload = () => {
+    if (!ticket) return
     const content = `
       <!DOCTYPE html>
       <html lang="pt-BR">
         <head>
           <meta charset="UTF-8" />
-          <title>Ingresso - ${eventTitle}</title>
+          <title>Ingresso - ${ticket.eventTitle}</title>
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
             body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: white; padding: 32px; display: flex; justify-content: center; }
@@ -163,8 +188,8 @@ function TicketContent() {
           <div class="ticket">
             <div class="ticket-header">
               <div class="venue">Arena Pernambuco</div>
-              <div class="title">${eventTitle}</div>
-              ${eventDate ? `<div class="date">${formatDate(eventDate)}</div>` : ""}
+              <div class="title">${ticket.eventTitle}</div>
+              <div class="date">${formatDate(ticket.eventDate)}</div>
             </div>
             <div class="divider"></div>
             <div class="ticket-body">
@@ -176,15 +201,15 @@ function TicketContent() {
                 </div>
                 <div class="field">
                   <label>Setor</label>
-                  <div class="value">${sectorLabel || "—"}</div>
+                  <div class="value">${ticket.location}</div>
                 </div>
                 <div class="field">
-                  <label>Quantidade</label>
-                  <div class="value">${quantity} ingresso${parseInt(quantity) > 1 ? "s" : ""}</div>
+                  <label>Preço</label>
+                  <div class="value">${fmt(ticket.price)}</div>
                 </div>
                 <div class="field">
-                  <label>Total pago</label>
-                  <div class="value">${fmt(total)}</div>
+                  <label>Status</label>
+                  <div class="value">${getTicketStatusLabel(ticket.ticketStatus)}</div>
                 </div>
               </div>
               <div class="qr-section">
@@ -201,14 +226,35 @@ function TicketContent() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
-    a.download = `ingresso-${eventTitle.replace(/\s+/g, "-").toLowerCase()}.html`
+    a.download = `ingresso-${ticket.eventTitle.replace(/\s+/g, "-").toLowerCase()}.html`
     a.click()
     URL.revokeObjectURL(url)
   }
 
-  const qrValue = resolvedTicketId
-    ? `https://arena.pe/ticket/${resolvedTicketId}`
+  const qrValue = ticket?.ticketId
+    ? `https://arena.pe/ticket/${ticket.ticketId}`
     : "pending"
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F8]">
+        <p className="text-gray-500 animate-pulse">Carregando ingresso...</p>
+      </div>
+    )
+  }
+
+  if (error || !ticket) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F7F8]">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error || "Ingresso não encontrado"}</p>
+          <Button onClick={() => router.push("/dashboard-user")} className="cursor-pointer">
+            Voltar para Meus Ingressos
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F7F8]">
@@ -219,8 +265,8 @@ function TicketContent() {
         {/* Confirmação */}
         <div className="flex flex-col items-center gap-2 mb-8 mt-4">
           <CheckCircle className="w-12 h-12 text-green-500" />
-          <h1 className="title-h1 text-center">Compra Confirmada!</h1>
-          <p className="subtitle text-center">Seu ingresso está pronto. Guarde-o para o dia do evento.</p>
+          <h1 className="title-h1 text-center">Ingresso Confirmado!</h1>
+          <p className="subtitle text-center">Guarde-o para o dia do evento.</p>
         </div>
 
         {/* Ticket visual */}
@@ -229,8 +275,8 @@ function TicketContent() {
           {/* Header azul */}
           <div className="bg-blue-600 p-8 text-white space-y-1">
             <p className="text-white/70 text-xs uppercase tracking-widest font-medium">Arena Pernambuco</p>
-            <h2 className="text-2xl font-bold">{eventTitle}</h2>
-            {eventDate && <p className="text-white/80 text-sm">{formatDate(eventDate)}</p>}
+            <h2 className="text-2xl font-bold">{ticket.eventTitle}</h2>
+            <p className="text-white/80 text-sm">{formatDate(ticket.eventDate)}</p>
           </div>
 
           {/* Separador estilo ingresso */}
@@ -257,36 +303,34 @@ function TicketContent() {
                   <Tag className="w-3 h-3" />
                   <span>Setor</span>
                 </div>
-                <p className="font-semibold text-gray-800 text-sm">{sectorLabel || "—"}</p>
+                <p className="font-semibold text-gray-800 text-sm">{ticket.location}</p>
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-gray-400 text-xs uppercase tracking-wide">
                   <Users className="w-3 h-3" />
-                  <span>Quantidade</span>
+                  <span>Preço</span>
                 </div>
-                <p className="font-semibold text-gray-800 text-sm">
-                  {quantity} ingresso{parseInt(quantity) > 1 ? "s" : ""}
-                </p>
+                <p className="font-semibold text-gray-800 text-sm">{fmt(ticket.price)}</p>
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5 text-gray-400 text-xs uppercase tracking-wide">
                   <Calendar className="w-3 h-3" />
-                  <span>Total pago</span>
+                  <span>Status</span>
                 </div>
-                <p className="font-semibold text-gray-800 text-sm">{fmt(total)}</p>
+                <p className={`font-semibold text-sm ${getTicketStatusColor(ticket.ticketStatus)}`}>
+                  {getTicketStatusLabel(ticket.ticketStatus)}
+                </p>
               </div>
             </div>
 
             {/* QR Code */}
             <div className="flex flex-col items-center gap-3 pt-4 border-t">
-              {isLoading ? (
-                <div className="w-32 h-32 bg-gray-100 rounded-xl animate-pulse" />
-              ) : resolvedTicketId && resolvedTicketId !== "pending" ? (
+              {ticket.ticketId && ticket.ticketId !== "pending" ? (
                 <>
                   <QRCodeSVG value={qrValue} size={128} bgColor="#ffffff" fgColor="#000000" level="H" includeMargin />
-                  <p className="text-xs text-gray-400 font-mono">{resolvedTicketId}</p>
+                  <p className="text-xs text-gray-400 font-mono">{ticket.ticketId}</p>
                 </>
               ) : (
                 <div className="w-32 h-32 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-dashed border-gray-300">

@@ -1,6 +1,7 @@
 package com.ffqts.arenape.services;
 
 import com.ffqts.arenape.models.ticket.UserTicket;
+import com.ffqts.arenape.models.ticket.TicketStatus;
 import com.ffqts.arenape.models.user.Role;
 import com.ffqts.arenape.models.user.User;
 import com.ffqts.arenape.repositories.UserRepository;
@@ -33,13 +34,13 @@ public class TicketCancellationService {
             throw new IllegalArgumentException("Você não tem permissão para cancelar este ticket");
         }
 
-        ticket.setIsValid(false);
+        ticket.setStatus(TicketStatus.CANCELADO);
         userTicketRepository.save(ticket);
     }
 
     public boolean isTicketValid(UUID ticketId) {
         return userTicketRepository.findById(ticketId)
-            .map(UserTicket::getIsValid)
+            .map(ticket -> ticket.getStatus() == TicketStatus.VALIDO)
             .orElse(false);
     }
 }

@@ -1,6 +1,7 @@
 package com.ffqts.arenape.repositories;
 
 import com.ffqts.arenape.models.ticket.UserTicket;
+import com.ffqts.arenape.models.ticket.TicketStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +14,6 @@ public interface UserTicketRepository extends JpaRepository<UserTicket, UUID> {
     int countByTicketModel_Id(UUID ticketModelId);
     List<UserTicket> findByEvent_Id(UUID eventId);
     Page<UserTicket> findByUser_Id(UUID userId, Pageable pageable);
-    Page<UserTicket> findByUser_IdAndIsValid(UUID userId, boolean isValid, Pageable pageable);
+    Page<UserTicket> findByUser_IdAndStatus(UUID userId, TicketStatus status, Pageable pageable);
+    Page<UserTicket> findByUser_IdAndEvent_Id(UUID userId, UUID eventId, Pageable pageable);
 }

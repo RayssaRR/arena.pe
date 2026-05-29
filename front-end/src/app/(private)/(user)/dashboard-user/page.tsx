@@ -89,6 +89,9 @@ export default function UserDashboard() {
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  console.log(upcomingEvents);
+  
+
   useEffect(() => {
     const name = getUserNameFromToken();
     if (name) setUserName(name);
@@ -97,10 +100,13 @@ export default function UserDashboard() {
       try {
         const token = localStorage.getItem("authToken");
         if (!token) return;
-        const res = await fetch(`${BACKEND_URL}/user/tickets/upcoming`, {
+        const res = await fetch(`${BACKEND_URL}/reservation/events/purchased?page=0&pageSize=4`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        if (res.ok) setUpcomingEvents(await res.json());
+        if (res.ok) {
+          const data = await res.json();
+          setUpcomingEvents(data.content || []);
+        };
       } catch (err) {
         console.error("Erro ao carregar eventos:", err);
       } finally {
@@ -128,7 +134,7 @@ export default function UserDashboard() {
             onClick={() => router.push("/dashboard-user/my-tickets?filter=upcoming")}
             className="text-sm text-(--blue) font-medium hover:underline cursor-pointer"
           >
-            Ver tudo
+            Meus Ingressos
           </button>
         </div>
 
@@ -137,8 +143,8 @@ export default function UserDashboard() {
         ) : upcomingEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum evento próximo encontrado.</p>
         ) : (
-          <div className="grid grid-cols-2 gap-8">
-            {upcomingEvents.slice(0, 2).map((event) => (
+          <div className="grid grid-cols-4 gap-8">
+            {upcomingEvents.slice(0, 3).map((event) => (
               <UpcomingEventCard key={event.id} event={event} />
             ))}
           </div>

@@ -35,7 +35,7 @@ function formatDate(dateStr: string): string {
 
 function EventCard({ event }: { event: Event }) {
   const router = useRouter();
-  const imageUrl = resolvePublicAssetUrl(event.imageUrl);
+  const imageUrl = resolvePublicAssetUrl(event.imageUrl!);
 
   return (
     <Card className="mx-auto w-full pt-0 overflow-hidden">
