@@ -73,8 +73,6 @@ export default function UserDashboard() {
   const router = useRouter();
   const [userName, setUserName] = useState("Usuário");
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
-  const [pastEvents, setPastEvents] = useState<PastEvent[]>([]);
-  const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -85,12 +83,8 @@ export default function UserDashboard() {
       try {
         const token = localStorage.getItem("authToken");
         if (!token) return;
-        const [upcomingRes, pastRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/user/tickets/upcoming`, { headers: { Authorization: `Bearer ${token}` } }),
-          fetch(`${BACKEND_URL}/user/tickets/past`, { headers: { Authorization: `Bearer ${token}` } }),
-        ]);
+        const upcomingRes = await fetch(`${BACKEND_URL}/user/tickets/upcoming`, { headers: { Authorization: `Bearer ${token}` } });
         if (upcomingRes.ok) setUpcomingEvents(await upcomingRes.json());
-        if (pastRes.ok) setPastEvents(await pastRes.json());
       } catch (err) {
         console.error("Erro ao carregar eventos:", err);
       } finally {
@@ -104,22 +98,11 @@ export default function UserDashboard() {
   return (
     <main className="p-8 min-h-screen bg-[#F5F7F8]">
 
-      {/* Barra de busca + sino */}
-      <div className="flex items-center justify-center gap-4 mb-8">
-        <div className="relative w-full max-w-lg">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <Input placeholder="Procure por shows, partidas de futebol..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-        </div>
-        <button type="button" className="p-2 rounded-full hover:bg-gray-100 transition cursor-pointer">
-          <Bell className="w-5 h-5 text-gray-500" />
-        </button>
-      </div>
-
       {/* Boas vindas */}
       <header className="space-y-1 mb-8">
         <h1 className="title-h1">Bem vindo de volta, {userName}!</h1>
         <p className="subtitle">
-          Você tem {upcomingEvents.length} eventos programados para este mês. Pronto para curtir o espetáculo?
+          Você tem {upcomingEvents.length} eventos programados para este mês.
         </p>
       </header>
 
@@ -144,54 +127,6 @@ export default function UserDashboard() {
             {upcomingEvents.slice(0, 2).map((event) => (
               <UpcomingEventCard key={event.id} event={event} />
             ))}
-          </div>
-        )}
-      </section>
-
-      {/* Últimos eventos */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="title-h3">Últimos Eventos</h3>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard-user/my-tickets?filter=past")}
-            className="text-sm text-(--blue) font-medium hover:underline cursor-pointer"
-          >
-            Ver tudo
-          </button>
-        </div>
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground animate-pulse">Carregando...</p>
-        ) : pastEvents.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum evento anterior encontrado.</p>
-        ) : (
-          <div className="border rounded-2xl overflow-hidden">
-            <table className="w-full text-left">
-              <thead className="text-gray-500 bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3" scope="col">EVENTO</th>
-                  <th className="px-4 py-3" scope="col">DATA</th>
-                  <th className="px-4 py-3" scope="col">LOCAL</th>
-                  <th className="px-4 py-3" scope="col">STATUS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pastEvents.map((event) => (
-                  <tr key={event.id} className="border-t hover:bg-gray-50 transition cursor-pointer">
-                    <td className="px-4 py-3">{event.title}</td>
-                    <td className="px-4 py-3">{formatDateLong(event.eventDate)}</td>
-                    <td className="px-4 py-3">{event.location}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-4 py-1 rounded-2xl text-sm font-medium ${
-                        event.status === "COMPARECEU" ? "bg-(--green-light) text-(--green-dark)" : "bg-red-100 text-red-600"
-                      }`}>
-                        {event.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         )}
       </section>

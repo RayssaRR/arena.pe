@@ -7,29 +7,9 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import BuyTicketCard from "../components/BuyTicketCard";
 import Details from "../components/Details";
+import { getEventById, EventResponse, resolvePublicAssetUrl, ApiError } from "@/lib/api";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
-
-type TicketSector = {
-  location: string;
-  price: number;
-  capacity: number;
-  sold?: number;
-};
-
-type Event = {
-  id: string;
-  title: string;
-  description: string;
-  eventDate: string;
-  capacity: number;
-  ticketsSold: number;
-  status: string;
-  imageUrl: string | null;
-  category: { id: number; title: string } | null;
-  ticketSectors?: TicketSector[];
-};
+type Event = EventResponse;
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -106,16 +86,22 @@ function LoadingState() {
 function EventDetailsContent() {
   const searchParams = useSearchParams();
   const eventId = searchParams?.get("id");
-  const router = useRouter();
-
   const [event, setEvent] = useState<Event | null>(null);
-  const [otherEvents, setOtherEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!eventId) {
-      setError("ID do evento não fornecido");
+    // Validar ID antes de tentar buscar
+    if (!eventId || eventId.trim() === "") {
+      setError("ID do evento não fornecido. Volte e selecione um evento válido.");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validar se é um UUID válido
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(eventId)) {
+      setError(`ID do evento inválido: ${eventId}`);
       setIsLoading(false);
       return;
     }
@@ -125,22 +111,24 @@ function EventDetailsContent() {
         setIsLoading(true);
         setError(null);
 
-        const [eventRes, othersRes] = await Promise.all([
-          fetch(`${BACKEND_URL}/events/${eventId}`),
-          fetch(`${BACKEND_URL}/events?status=UPCOMING&orderBy=eventDate&direction=asc`),
-        ]);
-
-        if (!eventRes.ok) throw new Error("Evento não encontrado");
-        const eventData: Event = await eventRes.json();
+        const eventData = await getEventById(eventId!);
         setEvent(eventData);
 
-        if (othersRes.ok) {
-          const othersData: Event[] = await othersRes.json();
-          setOtherEvents(othersData.filter((e) => e.id !== eventId).slice(0, 4));
-        }
       } catch (err) {
         console.error("Erro ao buscar evento:", err);
-        setError("Não foi possível carregar o evento.");
+        if (err instanceof ApiError) {
+          if (err.statusCode === 404) {
+            setError("Evento não encontrado.");
+          } else if (err.statusCode === 403) {
+            setError("Você não tem permissão para acessar este evento.");
+          } else {
+            setError(err.message);
+          }
+        } else if (err instanceof Error) {
+          setError(`Erro: ${err.message}`);
+        } else {
+          setError("Não foi possível carregar o evento. Tente novamente mais tarde.");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -176,7 +164,7 @@ function EventDetailsContent() {
         <section className="relative rounded-3xl h-[50vh] overflow-hidden shadow-xl">
           {event.imageUrl && (
             <img
-              src={event.imageUrl.startsWith("/") ? BACKEND_URL + event.imageUrl : event.imageUrl}
+              src={resolvePublicAssetUrl(event.imageUrl) ?? event.imageUrl}
               alt={event.title}
               className="absolute inset-0 w-full h-full object-cover"
             />
@@ -207,25 +195,22 @@ function EventDetailsContent() {
           </div>
           <div className="w-full">
             <BuyTicketCard
-              sectors={event.ticketSectors ?? []}
+              sectors={
+                event.ticketSectors?.map((sector) => ({
+                  id: sector.id,
+                  title: sector.title,
+                  location: sector.location,
+                  price: sector.price,
+                  ticketsAvailable: sector.ticketsAvailable,
+                  ticketsSold: sector.ticketsSold,
+                })) ?? []
+              }
               eventId={event.id}
               eventTitle={event.title}
               eventDate={event.eventDate}
             />
           </div>
         </section>
-
-        {/* Outros eventos */}
-        {otherEvents.length > 0 && (
-          <section>
-            <h3 className="title-h3">Outros Eventos na Arena Pernambuco</h3>
-            <div className="grid grid-cols-4 gap-8 mt-4">
-              {otherEvents.map((e) => (
-                <NextEventCard key={e.id} event={e} />
-              ))}
-            </div>
-          </section>
-        )}
       </main>
     </div>
   );

@@ -99,7 +99,6 @@ public class UserTicketService {
                 ticket.getId().toString(),
                 ticket.getEvent().getTitle(),
                 ticket.getEvent().getId().toString(),
-                ticket.getTicketModel().getTitle(),
                 ticket.getTicketModel().getPrice(),
                 ticket.getTicketModel().getTicketLocation().toString(),
                 ticket.getIsValid(),

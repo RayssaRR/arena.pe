@@ -1,9 +1,9 @@
 package com.ffqts.arenape.controllers;
 
+import com.ffqts.arenape.controllers.dto.event.EventResponseDTO;
 import com.ffqts.arenape.controllers.dto.event.NewEventForm;
 import com.ffqts.arenape.controllers.utils.GetEmailFromTokenRequest;
 import com.ffqts.arenape.models.event.Event;
-import com.ffqts.arenape.models.event.EventStatus;
 import com.ffqts.arenape.services.EventService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -23,22 +22,19 @@ public class EventController {
 
     @GetMapping
     @PreAuthorize("permitAll()")
-    public ResponseEntity<List<Event>> getAllEvents(
-    @RequestParam(required = false) String title,
-    @RequestParam(required = false) EventStatus status,
-    @RequestParam(required = false) Long categoryId,
-    @RequestParam(required = false) LocalDate date,
-    @RequestParam(required = false) String orderBy,
-    @RequestParam(required = false) String direction
+    public ResponseEntity<List<EventResponseDTO>> getAllEvents(
+    @RequestParam(required = false) Long categoryId
     ) {
-        var events = eventService.getFilteredEvents(title, status, categoryId, date, orderBy, direction);
+        var events = (categoryId != null)
+            ? eventService.getFilteredEventsWithDetails(categoryId)
+            : eventService.getAllEventsWithDetails();
         return ResponseEntity.ok(events);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("permitAll()")
-    public ResponseEntity<Event> getEventById(@PathVariable String id) {
-        var event = eventService.getEventById(id);
+    public ResponseEntity<EventResponseDTO> getEventById(@PathVariable String id) {
+        var event = eventService.getEventByIdWithDetails(id);
         return ResponseEntity.ok(event);
     }
 

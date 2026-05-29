@@ -1,16 +1,21 @@
 package com.ffqts.arenape.services;
 
+import com.ffqts.arenape.controllers.dto.event.EventResponseDTO;
 import com.ffqts.arenape.controllers.dto.event.NewEventForm;
+import com.ffqts.arenape.controllers.dto.event.TicketSectorDTO;
+import com.ffqts.arenape.controllers.dto.ticket.NewTicketModelForm;
 import com.ffqts.arenape.models.event.Category;
 import com.ffqts.arenape.models.event.Event;
 import com.ffqts.arenape.models.event.EventStatus;
+import com.ffqts.arenape.models.ticket.TicketModel;
 import com.ffqts.arenape.repositories.CategoryRepository;
 import com.ffqts.arenape.repositories.EventRepository;
+import com.ffqts.arenape.repositories.TicketModelRepository;
 import com.ffqts.arenape.repositories.UserRepository;
+import com.ffqts.arenape.repositories.UserTicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,32 +33,57 @@ public class EventService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private TicketModelRepository ticketModelRepository;
+
+    @Autowired
+    private UserTicketRepository userTicketRepository;
+
+    @Autowired
+    private TicketModelService ticketModelService;
+
     public List<Event> getAllEvents() { return eventRepository.findAll(); }
 
-    public List<Event> getFilteredEvents(
-            String title,
-            EventStatus status,
-            Long categoryId,
-            LocalDate date,
-            String orderBy,
-            String direction
-    ) {
-        String normalizedOrderBy = (orderBy == null || orderBy.isBlank()) ? "eventDate" : orderBy;
-        String normalizedDirection = (direction == null || direction.isBlank()) ? "asc" : direction.toLowerCase();
+    public List<EventResponseDTO> getAllEventsWithDetails() {
+        return eventRepository.findAll().stream()
+            .map(this::convertEventToResponseDTO)
+            .toList();
+    }
 
-        if (!List.of("eventDate", "title", "popularity").contains(normalizedOrderBy)) {
-            throw new IllegalArgumentException("Ordenação inválida. Use 'eventDate', 'title' ou 'popularity'");
-        }
+    private EventResponseDTO convertEventToResponseDTO(Event event) {
+        List<TicketModel> ticketModels = ticketModelRepository.findByEvent_Id(event.getId());
+        int totalCapacity = ticketModels.stream()
+            .mapToInt(TicketModel::getTicketsAvailable)
+            .sum();
+        
+        int totalTicketsSold = userTicketRepository.countByEvent_Id(event.getId());
+        
+        List<TicketSectorDTO> sectors = ticketModels.stream()
+            .map(tm -> new TicketSectorDTO(
+                tm.getId().toString(),
+                tm.getTicketLocation(),
+                tm.getPrice(),
+                tm.getTicketsAvailable(),
+                userTicketRepository.countByTicketModel_Id(tm.getId())
+            ))
+            .toList();
+        
+        return new EventResponseDTO(
+            event.getId().toString(),
+            event.getTitle(),
+            event.getDescription(),
+            event.getEventDate(),
+            totalCapacity,
+            totalTicketsSold,
+            event.getStatus(),
+            event.getImageUrl(),
+            event.getCategory(),
+            sectors
+        );
+    }
 
-        if (!normalizedDirection.equals("asc") && !normalizedDirection.equals("desc")) {
-            throw new IllegalArgumentException("Direção inválida. Use 'asc' ou 'desc'");
-        }
 
-        if (categoryId != null) {
-            categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
-        }
-
+    private void updateEventStatuses() {
         List<Event> todos = eventRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
         List<Event> toUpdate = new ArrayList<>();
@@ -74,20 +104,25 @@ public class EventService {
         if (!toUpdate.isEmpty()) {
             eventRepository.saveAll(toUpdate);
         }
+    }
 
-        return eventRepository.findWithFilters(
-            title,
-            status,
-            categoryId,
-            date,
-            normalizedOrderBy,
-            normalizedDirection
-        );
+    public List<EventResponseDTO> getFilteredEventsWithDetails(
+            Long categoryId
+    ) {
+        List<Event> filteredEvents = eventRepository.findByCategory_Id(categoryId);
+        return filteredEvents.stream()
+            .map(this::convertEventToResponseDTO)
+            .toList();
     }
 
     public Event getEventById(String eventId) {
         return eventRepository.findById(UUID.fromString(eventId))
             .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
+    }
+
+    public EventResponseDTO getEventByIdWithDetails(String eventId) {
+        Event event = getEventById(eventId);
+        return convertEventToResponseDTO(event);
     }
 
     public Event createEvent(NewEventForm newEventForm, String creatorEmail) {
@@ -114,14 +149,27 @@ public class EventService {
             category
         );
 
-        return eventRepository.save(newEvent);
+        Event savedEvent = eventRepository.save(newEvent);
+
+        for (int i = 0; i < newEventForm.tickets().size(); i++) {
+            var ticketSector = newEventForm.tickets().get(i);
+            var ticketModelForm = new NewTicketModelForm(
+                savedEvent.getId(),
+                ticketSector.location(),
+                ticketSector.price(),
+                ticketSector.ticketsAvailable()
+            );
+            ticketModelService.createTicketModel(ticketModelForm);
+        }
+
+        return savedEvent;
     }
 
     public Event updateEvent(NewEventForm updatedEvent, String eventId) {
         var currentEvent = eventRepository.findById(UUID.fromString(eventId))
             .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
         updateEventData(updatedEvent, currentEvent);
-        return currentEvent;
+        return eventRepository.save(currentEvent);
     }
 
     public void deleteEvent(String eventId, String creatorEmail) {
@@ -135,6 +183,10 @@ public class EventService {
         currentEvent.setDescription(updatedEvent.description());
         currentEvent.setEventDate(updatedEvent.eventDate());
         currentEvent.setImageUrl(updatedEvent.imageUrl());
+        
+        Category category = categoryRepository.findById(updatedEvent.categoryId())
+            .orElseThrow(() -> new IllegalArgumentException("Categoria não encontrada"));
+        currentEvent.setCategory(category);
     }
 }
 

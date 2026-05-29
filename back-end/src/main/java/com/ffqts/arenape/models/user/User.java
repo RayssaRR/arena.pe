@@ -34,16 +34,16 @@ public class User extends BaseEntity implements UserDetails {
     private UUID id;
 
     @NotBlank(message = "Nome não pode ficar vazio")
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String name;
 
     @NotBlank(message = "Email não pode ficar vazio")
     @Email(message = "Email inválido")
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, columnDefinition = "VARCHAR(255)")
     private String email;
 
     @NotBlank(message = "Senha não pode ficar vazia")
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(500)")
     private String password;
 
     @Enumerated(EnumType.STRING)

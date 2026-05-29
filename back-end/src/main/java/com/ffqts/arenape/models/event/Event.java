@@ -23,10 +23,12 @@ public class Event extends BaseEntity {
 
     @NotBlank(message = "Título é obrigatório")
     @Size(min = 3, max = 150, message = "Título deve ter entre 3 e 150 caracteres")
+    @Column(columnDefinition = "TEXT")
     private String title;
 
     @NotBlank(message = "Descrição é obrigatória")
     @Size(min = 10, max = 1000, message = "Descrição deve ter entre 10 e 1000 caracteres")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @NotNull(message = "Data do evento é obrigatória")
@@ -38,6 +40,7 @@ public class Event extends BaseEntity {
 
     @NotBlank(message = "URL da imagem é obrigatória")
     @Size(min = 5, max = 500, message = "URL da imagem deve ter entre 5 e 500 caracteres")
+    @Column(columnDefinition = "VARCHAR(500)")
     private String imageUrl;
 
     @JsonIgnore

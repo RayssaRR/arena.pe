@@ -2,23 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { getCategories, Category } from "@/lib/api"
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080"
-const TODAY = new Date().toISOString().split("T")[0]
 const MAX_PRICE = 500
-
-type Category = {
-  id: number
-  title: string
-  description: string
-}
 
 type FilterState = {
   categories: number[]
-  date: string
-  maxPrice: number
 }
 
 interface FilterProps {
@@ -28,8 +17,6 @@ interface FilterProps {
 export default function Filter({ onApply }: FilterProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategories, setSelectedCategories] = useState<number[]>([])
-  const [date, setDate] = useState("")
-  const [maxPrice, setMaxPrice] = useState(MAX_PRICE)
   const [isLoading, setIsLoading] = useState(true)
 
   // Buscar categorias do backend
@@ -37,9 +24,7 @@ export default function Filter({ onApply }: FilterProps) {
     async function fetchCategories() {
       try {
         setIsLoading(true)
-        const res = await fetch(`${BACKEND_URL}/categories`)
-        if (!res.ok) throw new Error("Erro ao buscar categorias")
-        const data: Category[] = await res.json()
+        const data = await getCategories()
         setCategories(data)
         console.log("Categorias carregadas:", data)
       } catch (err) {
@@ -60,7 +45,7 @@ export default function Filter({ onApply }: FilterProps) {
   }
 
   const handleApply = () => {
-    onApply?.({ categories: selectedCategories, date, maxPrice })
+    onApply?.({ categories: selectedCategories })
   }
 
   return (
@@ -88,34 +73,6 @@ export default function Filter({ onApply }: FilterProps) {
           ) : (
             <p className="text-sm text-muted-foreground">Nenhuma categoria disponível</p>
           )}
-        </div>
-      </div>
-
-      {/* DATA */}
-      <div className="space-y-2">
-        <h4 className="body-md font-bold">Data</h4>
-        <Input
-          type="date"
-          value={date}
-          min={TODAY}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </div>
-
-      {/* FAIXA DE PREÇO */}
-      <div className="space-y-2">
-        <h4 className="body-md font-bold">Faixa de Preço</h4>
-        <input
-          type="range"
-          min={0}
-          max={MAX_PRICE}
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(Number(e.target.value))}
-          className="w-full accent-(--blue) cursor-pointer"
-        />
-        <div className="flex justify-between">
-          <p className="body">R$ 0,00</p>
-          <p className="body">R$ {maxPrice.toFixed(2).replace(".", ",")}</p>
         </div>
       </div>
 

@@ -5,15 +5,17 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LOCATION_LABELS } from "@/app/(private)/(admin)/components/TicketLocations"
+import { createReservation } from "@/lib/api"
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080"
 const TAX_RATE = 0.1667
 
 type TicketSector = {
-  location: string
-  price: number
-  capacity: number
-  sold?: number
+  id: string;
+  title: string;
+  location: string;
+  price: number;
+  ticketsAvailable: number;
+  ticketsSold: number;
 }
 
 interface BuyTicketCardProps {
@@ -31,10 +33,13 @@ export default function BuyTicketCard({ sectors = [], eventId, eventTitle, event
   const [error, setError] = useState<string | null>(null)
 
   const selectedSector = sectors.find((s) => s.location === selectedLocation)
-  const available = selectedSector ? selectedSector.capacity - (selectedSector.sold ?? 0) : 0
+  const available = selectedSector ? selectedSector.ticketsAvailable - selectedSector.ticketsSold : 0
   const subtotal = selectedSector ? selectedSector.price * quantity : 0
   const taxes = subtotal * TAX_RATE
   const total = subtotal + taxes
+
+  console.log(sectors);
+  
 
   const fmt = (value: number) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
@@ -48,20 +53,13 @@ export default function BuyTicketCard({ sectors = [], eventId, eventTitle, event
       const token = localStorage.getItem("authToken")
       if (!token) throw new Error("Faça login para comprar ingressos")
 
-      const response = await fetch(`${BACKEND_URL}/reservation`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          eventId,
-          location: selectedLocation,
+      await createReservation(
+        {
+          ticketModelId: selectedSector.id,
           quantity,
-        }),
-      })
-
-      if (!response.ok) throw new Error("Erro ao processar compra")
+        },
+        token
+      )
 
       const params = new URLSearchParams({
         eventId: eventId ?? "",
@@ -97,7 +95,7 @@ export default function BuyTicketCard({ sectors = [], eventId, eventTitle, event
           >
             <option value="" disabled>Escolha o setor...</option>
             {sectors.map((s) => {
-              const avail = s.capacity - (s.sold ?? 0)
+              const avail = s.ticketsAvailable - s.ticketsSold
               return (
                 <option key={s.location} value={s.location} disabled={avail <= 0}>
                   {LOCATION_LABELS[s.location] ?? s.location} — {fmt(s.price)}{avail <= 0 ? " (Esgotado)" : ""}
@@ -105,11 +103,6 @@ export default function BuyTicketCard({ sectors = [], eventId, eventTitle, event
               )
             })}
           </select>
-        )}
-        {selectedSector && (
-          <p className="text-xs text-gray-500">
-            {available.toLocaleString("pt-BR")} ingressos disponíveis de {selectedSector.capacity.toLocaleString("pt-BR")}
-          </p>
         )}
       </div>
 
@@ -124,6 +117,7 @@ export default function BuyTicketCard({ sectors = [], eventId, eventTitle, event
             const val = Math.max(1, Math.min(available, parseInt(e.target.value) || 1))
             setQuantity(val)
           }}
+
           disabled={!selectedLocation}
         />
       </div>

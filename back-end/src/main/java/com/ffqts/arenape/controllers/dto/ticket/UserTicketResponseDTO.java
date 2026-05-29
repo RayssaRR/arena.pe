@@ -6,7 +6,6 @@ public record UserTicketResponseDTO(
     String ticketId,
     String eventTitle,
     String eventId,
-    String ticketModelTitle,
     Double price,
     String location,
     Boolean isValid,

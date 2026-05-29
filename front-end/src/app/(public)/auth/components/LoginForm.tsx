@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login } from "@/lib/api";
+import { getUserFromToken } from "@/lib/jwt-utils";
 import { useRouter } from "next/navigation";
 import { useState, FormEvent } from "react";
 
@@ -58,9 +59,8 @@ export default function LoginForm() {
         password: formData.password,
       });
 
-      // Armazenar token e role
+      // Armazenar token
       localStorage.setItem("authToken", response.token);
-      localStorage.setItem("userRole", response.role);
       
       if (rememberMe) {
         localStorage.setItem("rememberEmail", formData.email);
@@ -68,8 +68,10 @@ export default function LoginForm() {
         localStorage.removeItem("rememberEmail");
       }
 
+      const userInfo = getUserFromToken();
+
       // Redirecionar baseado no role
-      const redirectUrl = response.role === "ADMIN" ? "/dashboard-admin" : "/dashboard-user";
+      const redirectUrl = userInfo?.role === "ADMIN" ? "/dashboard-admin" : "/dashboard-user";
       router.push(redirectUrl);
     } catch (err: unknown) {
       const errorMessage =

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record NewEventForm(
     @NotBlank(message = "Titulo não pode ficar em branco")
@@ -19,6 +20,8 @@ public record NewEventForm(
     String imageUrl,
 
     @PositiveOrZero(message = "Id da categoria deve ser um número positivo ou zero")
-    Long categoryId
+    Long categoryId,
+
+    List<NewTicketSector> tickets
 ) {
 }

@@ -159,14 +159,12 @@ export default function EventForm() {
           title: formData.title,
           description: formData.description,
           eventDate: eventDateTime,
-          capacity: totalSelectedCapacity,
-          status: "UPCOMING",
           imageUrl: formData.imageUrl,
           categoryId: parseInt(formData.categoryId),
-          ticketSectors: selectedSectors.map((s) => ({
+          tickets: selectedSectors.map((s) => ({
             location: s.location,
             price: parseFloat(s.price),
-            capacity: parseInt(s.capacity),
+            ticketsAvailable: parseInt(s.capacity),
           })),
         },
         token

@@ -23,13 +23,6 @@ type Event = {
   category: { id: number; title: string } | null;
 };
 
-const CATEGORY_MAP: Record<string, string> = {
-  Esportes: "Esporte",
-  Shows: "Show",
-  Tours: "Tour",
-  "E-Sports": "E-Sport",
-};
-
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date
@@ -61,7 +54,7 @@ function EventCard({ event }: { event: Event }) {
 
       <CardFooter className="flex justify-end gap-5 bg-white p-5">
         <Button
-          onClick={() => router.push(`/event-details/${event.id}`)}
+          onClick={() => router.push(`/event-details?id=${event.id}`)}
           className="bg-(--blue) hover:bg-(--blue-hover) cursor-pointer"
         >
           Detalhes
@@ -72,11 +65,11 @@ function EventCard({ event }: { event: Event }) {
 }
 
 export default function Home() {
+  const router = useRouter();
+
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState("Todos os Eventos");
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     async function fetchEvents() {
@@ -84,24 +77,10 @@ export default function Home() {
         setIsLoading(true);
         setError(null);
 
-        const params = new URLSearchParams({
-          status: "UPCOMING",
-          orderBy: "eventDate",
-          direction: "asc",
-        });
-
-        if (selectedCategory !== "Todos os Eventos") {
-          params.set("title", CATEGORY_MAP[selectedCategory] ?? selectedCategory);
-        }
-
-        if (searchTerm.trim()) {
-          params.set("title", searchTerm.trim());
-        }
-
-        const res = await fetch(`${BACKEND_URL}/events?${params.toString()}`);
+        const res = await fetch(`${BACKEND_URL}/events`);
         if (!res.ok) throw new Error("Erro ao buscar eventos");
         const data: Event[] = await res.json();
-        setEvents(data);
+        setEvents(data.slice(0, 3));
       } catch {
         setError("Não foi possível carregar os eventos.");
       } finally {
@@ -110,7 +89,7 @@ export default function Home() {
     }
 
     fetchEvents();
-  }, [selectedCategory, searchTerm]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F5F7F8]">
@@ -137,20 +116,21 @@ export default function Home() {
               exclusivos na Arena Pernambuco.
             </p>
           </div>
-          <div className="relative z-10 w-full max-w-xl">
-            <SearchBar onSearch={setSearchTerm} />
-          </div>
         </section>
 
         {/* Content */}
-        <div className="grid grid-cols-4 gap-8 mt-8 items-start">
+        <div className="gap-8 mt-8 items-start">
 
-          <section className="col-span-1 flex flex-col gap-4 mt-8">
-            <Category value={selectedCategory} onChange={setSelectedCategory} />
-          </section>
+          <section className="w-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="title-h3">Próximos Eventos</h3>
 
-          <section className="col-span-3">
-            <h3 className="title-h3">Próximos Eventos</h3>
+              <Button
+                onClick={() => router.push("/event-discover")}
+              >
+                Ver todos
+              </Button>
+            </div>
 
             {isLoading && (
               <p className="text-sm text-muted-foreground animate-pulse">

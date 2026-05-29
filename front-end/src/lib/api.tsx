@@ -6,14 +6,49 @@ export const api = axios.create({
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
 
+// Classe de erro customizada para melhor tratamento
+export class ApiError extends Error {
+  constructor(public statusCode: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
+// Função auxiliar para tratamento de erros do axios
+function handleAxiosError(error: unknown): never {
+  if (axios.isAxiosError(error)) {
+    const statusCode = error.response?.status || 500;
+    let message = `Erro ${statusCode}`;
+    
+    if (error.response?.data?.message) {
+      message = error.response.data.message;
+    } else if (statusCode === 404) {
+      message = "Recurso não encontrado";
+    } else if (statusCode === 403) {
+      message = "Acesso negado";
+    } else if (statusCode === 401) {
+      message = "Não autorizado";
+    } else if (statusCode >= 500) {
+      message = "Erro no servidor";
+    }
+    
+    throw new ApiError(statusCode, message);
+  }
+  throw error;
+}
+
 export async function postJson<TResponse = unknown, TPayload = unknown>(
   url: string,
   payload: TPayload,
 ): Promise<TResponse> {
-  const { data } = await axios.post<TResponse>(url, payload, {
-    headers: { "Content-Type": "application/json" },
-  });
-  return data;
+  try {
+    const { data } = await axios.post<TResponse>(url, payload, {
+      headers: { "Content-Type": "application/json" },
+    });
+    return data;
+  } catch (error) {
+    return handleAxiosError(error);
+  }
 }
 
 export async function postJsonWithAuth<TResponse = unknown, TPayload = unknown>(
@@ -21,31 +56,43 @@ export async function postJsonWithAuth<TResponse = unknown, TPayload = unknown>(
   payload: TPayload,
   token: string,
 ): Promise<TResponse> {
-  const { data } = await axios.post<TResponse>(url, payload, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return data;
+  try {
+    const { data } = await axios.post<TResponse>(url, payload, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return data;
+  } catch (error) {
+    return handleAxiosError(error);
+  }
 }
 
 export async function getJsonWithAuth<TResponse = unknown>(
   url: string,
   token: string,
 ): Promise<TResponse> {
-  const { data } = await axios.get<TResponse>(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return data;
+  try {
+    const { data } = await axios.get<TResponse>(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return data;
+  } catch (error) {
+    return handleAxiosError(error);
+  }
 }
 
-// GET sem token e sem Content-Type (causa 403 em alguns servidores)
+// GET sem token
 export async function getJson<TResponse = unknown>(
   url: string,
 ): Promise<TResponse> {
-  const { data } = await axios.get<TResponse>(url);
-  return data;
+  try {
+    const { data } = await axios.get<TResponse>(url);
+    return data;
+  } catch (error) {
+    return handleAxiosError(error);
+  }
 }
 
 export async function uploadImageToPublicAssets(
@@ -115,32 +162,32 @@ export async function getCategories(token?: string): Promise<Category[]> {
 
 // ── Events ─────────────────────────────────────────────────────────────────
 
-export interface TicketSectorRequest { location: string; price: number; capacity: number; }
+export interface TicketSectorRequest { location: string; price: number; ticketsAvailable: number; }
 
 export interface CreateEventRequest {
   title: string;
   description: string;
   eventDate: string;
-  capacity: number;
-  status: "UPCOMING" | "ONGOING" | "COMPLETED" | "CANCELED";
   imageUrl: string;
   categoryId: number;
-  ticketSectors?: TicketSectorRequest[];
+  tickets?: TicketSectorRequest[];
 }
 
-export interface TicketSector { location: string; price: number; capacity: number; sold?: number; }
+export interface TicketSector {
+  id: string;
+  location: string;
+  price: number;
+  ticketsAvailable: number;
+}
 
 export interface EventResponse {
   id: string;
   title: string;
   description: string;
   eventDate: string;
-  capacity: number;
-  ticketsSold: number;
-  status: string;
   imageUrl: string;
   category?: Category;
-  ticketSectors?: TicketSector[];
+  tickets?: TicketSector[];
 }
 
 export async function createEvent(payload: CreateEventRequest, token: string): Promise<EventResponse> {
@@ -150,6 +197,16 @@ export async function createEvent(payload: CreateEventRequest, token: string): P
 export async function getEvents(token?: string): Promise<EventResponse[]> {
   const url = `${BACKEND_BASE_URL}/events`;
   return token ? getJsonWithAuth<EventResponse[]>(url, token) : getJson<EventResponse[]>(url);
+}
+
+export async function getFilteredEvents(
+  categoryId?: number
+): Promise<EventResponse[]> {
+  const params = new URLSearchParams();
+  if (categoryId) params.append("categoryId", categoryId.toString());
+
+  const url = `${BACKEND_BASE_URL}/events${params.toString() ? "?" + params.toString() : ""}`;
+  return getJson<EventResponse[]>(url);
 }
 
 export async function getEventById(id: string): Promise<EventResponse> {
@@ -202,4 +259,16 @@ export async function cancelTicket(ticketId: string, token: string): Promise<voi
 
 export async function getTicketById(ticketId: string, token: string): Promise<UserTicketResponse> {
   return getJsonWithAuth<UserTicketResponse>(`${BACKEND_BASE_URL}/reservation/${ticketId}`, token);
+}
+
+export interface CreateReservationRequest {
+  ticketModelId: string;
+  quantity: number;
+}
+
+export async function createReservation(
+  payload: CreateReservationRequest,
+  token: string,
+): Promise<void> {
+  await postJsonWithAuth<void>(`${BACKEND_BASE_URL}/reservation`, payload, token);
 }

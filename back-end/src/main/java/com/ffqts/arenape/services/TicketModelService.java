@@ -34,10 +34,8 @@ public class TicketModelService {
 
         TicketModel ticketModel = new TicketModel(
             event,
-            form.title(),
             form.ticketLocation(),
             form.price(),
-            form.description(),
             form.ticketsAvailable()
         );
 
@@ -75,10 +73,8 @@ public class TicketModelService {
                 .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
 
         ticketModel.setEvent(event);
-        ticketModel.setTitle(form.title());
         ticketModel.setTicketLocation(form.ticketLocation());
         ticketModel.setPrice(form.price());
-        ticketModel.setDescription(form.description());
         ticketModel.setTicketsAvailable(form.ticketsAvailable());
 
         return ticketModelRepository.save(ticketModel);

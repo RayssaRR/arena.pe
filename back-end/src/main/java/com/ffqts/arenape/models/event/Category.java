@@ -16,9 +16,11 @@ public class Category {
   Long id;
 
   @NotBlank
+  @Column(columnDefinition = "TEXT")
   String title;
 
   @Nullable
+  @Column(columnDefinition = "TEXT")
   String description;
 
   @JsonIgnore
