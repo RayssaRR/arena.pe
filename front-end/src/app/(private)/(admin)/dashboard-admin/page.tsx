@@ -8,40 +8,84 @@ import { getUserNameFromToken } from "@/lib/jwt-utils";
 import { Calendar, Ticket, CircleDollarSign, Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [events, setEvents] = useState<EventResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState("Administrador");
+  const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [totalTicketsSold, setTotalTicketsSold] = useState<number>(0);
 
   useEffect(() => {
     const name = getUserNameFromToken();
     if (name) setUserName(name);
-
-    const loadEvents = async () => {
-      try {
-        // GET /events é público (permitAll), não precisa de token
-        const data = await getEvents();
-        setEvents(data);
-      } catch (err) {
-        console.error("Erro ao carregar eventos:", err);
-        setError("Erro ao carregar eventos");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadEvents();
+    loadData();
   }, []);
 
-  const handleDeleteEvent = (eventId: string) => {
-    console.log("Deletar evento:", eventId);
-  };
+  async function loadData() {
+    try {
+      const token = localStorage.getItem("authToken");
+      const data = await getEvents();
+      setEvents(data);
+
+      if (token && data.length > 0) {
+        const statsResults = await Promise.allSettled(
+          data.map((event) =>
+            fetch(`${BACKEND_URL}/events/statistics/${event.id}`, {
+              headers: { Authorization: `Bearer ${token}` },
+            }).then((r) => (r.ok ? r.json() : null))
+          )
+        );
+
+        let revenue = 0;
+        let tickets = 0;
+        for (const result of statsResults) {
+          if (result.status === "fulfilled" && result.value) {
+            revenue += result.value.totalRevenue ?? 0;
+            tickets += result.value.ticketsSold ?? 0;
+          }
+        }
+        setTotalRevenue(revenue);
+        setTotalTicketsSold(tickets);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar dados:", err);
+      setError("Erro ao carregar eventos");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const handleEditEvent = (eventId: string) => {
-    console.log("Editar evento:", eventId);
+    router.push(`/events/update?id=${eventId}`);
   };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    const confirmed = window.confirm("Tem certeza que deseja deletar este evento?");
+    if (!confirmed) return;
+
+    try {
+      const token = localStorage.getItem("authToken");
+      await axios.delete(`${BACKEND_URL}/events/${eventId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+    } catch (err) {
+      console.error("Erro ao deletar evento:", err);
+      alert("Erro ao deletar evento. Tente novamente.");
+    }
+  };
+
+  const formattedRevenue = totalRevenue.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
 
   return (
     <main className="p-8 min-h-screen">
@@ -55,20 +99,20 @@ export default function AdminDashboard() {
           <HomeCard
             icon={Calendar}
             label="Total de Eventos"
-            value={events.length || 0}
+            value={events.length}
             description={`${events.filter(e => e.status === "UPCOMING").length} eventos próximos`}
           />
           <HomeCard
             icon={Ticket}
             label="Ingressos Vendidos"
-            value={events.reduce((acc, e) => acc + (e.ticketsSold ?? 0), 0).toLocaleString("pt-BR")}
+            value={totalTicketsSold.toLocaleString("pt-BR")}
             description="Total de ingressos vendidos"
           />
           <HomeCard
             icon={CircleDollarSign}
             label="Receita Total"
-            value="R$ 45.200"
-            description="R$ 2.450 em processamento de pagamentos"
+            value={formattedRevenue}
+            description="Soma de todos os eventos"
           />
         </div>
       </section>

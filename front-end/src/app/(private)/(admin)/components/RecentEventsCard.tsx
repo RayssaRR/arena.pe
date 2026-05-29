@@ -1,135 +1,96 @@
-"use client";
+'use client';
 
-import { SquarePen, ChartNoAxesColumn, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Pencil, BarChart2, Trash2 } from "lucide-react";
 import { EventResponse } from "@/lib/api";
+
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).toUpperCase();
+}
+
+const STATUS_LABELS: Record<string, { label: string; className: string }> = {
+  UPCOMING: { label: "Próximo", className: "bg-blue-100 text-blue-700" },
+  ONGOING: { label: "Em andamento", className: "bg-yellow-100 text-yellow-700" },
+  COMPLETED: { label: "Concluído", className: "bg-gray-100 text-gray-600" },
+  CANCELED: { label: "Cancelado", className: "bg-red-100 text-red-600" },
+};
 
 interface RecentEventsCardProps {
   events: EventResponse[];
-  onDelete?: (eventId: string) => void;
-  onEdit?: (eventId: string) => void;
+  onDelete: (id: string) => void;
+  onEdit: (id: string) => void;
 }
 
-function formatDate(dateString: string): string {
-  try {
-    const date = new Date(dateString);
-    const formatter = new Intl.DateTimeFormat("pt-BR", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    return formatter.format(date).toUpperCase();
-  } catch {
-    return dateString;
-  }
-}
-
-function getStatusBadge(status: string): string {
-  const statusMap: Record<string, string> = {
-    UPCOMING: "Próximo",
-    ONGOING: "Em Andamento",
-    COMPLETED: "Concluído",
-    CANCELED: "Cancelado",
-  };
-  return statusMap[status] || status;
-}
-
-function getStatusColor(status: string): string {
-  const colorMap: Record<string, string> = {
-    UPCOMING: "bg-blue-100 text-blue-800",
-    ONGOING: "bg-green-100 text-green-800",
-    COMPLETED: "bg-gray-100 text-gray-800",
-    CANCELED: "bg-red-100 text-red-800",
-  };
-  return colorMap[status] || "bg-gray-100 text-gray-800";
-}
-
-export default function RecentEventsCard({
-  events,
-  onDelete,
-  onEdit,
-}: RecentEventsCardProps) {
+export default function RecentEventsCard({ events, onDelete, onEdit }: RecentEventsCardProps) {
   const router = useRouter();
-
-  const handleRowClick = (eventId: string) => {
-    router.push(`/event-details?id=${eventId}`);
-  };
 
   if (events.length === 0) {
     return (
-      <div className="border rounded-2xl overflow-hidden p-8 text-center text-gray-500">
-        <p>Nenhum evento cadastrado</p>
+      <div className="border rounded-2xl overflow-hidden p-8 text-center text-gray-400">
+        <p>Nenhum evento cadastrado ainda.</p>
       </div>
     );
   }
 
   return (
-    <div className="border rounded-2xl overflow-hidden">
+    <div className="border rounded-2xl overflow-hidden bg-white">
       <table className="w-full text-left">
-        {/* Header (Títulos) */}
-        <thead className="text-gray-500 bg-gray-50">
+        <thead className="text-gray-500 bg-gray-50 text-xs uppercase tracking-wider">
           <tr>
-            <th className="px-4 py-3" scope="col">
-              EVENTO
-            </th>
-            <th className="px-4 py-3" scope="col">
-              DATA
-            </th>
-            <th className="px-4 py-3" scope="col">
-              STATUS
-            </th>
-            <th className="px-4 py-3" scope="col">
-              AÇÕES
-            </th>
+            <th className="px-4 py-3">Evento</th>
+            <th className="px-4 py-3">Data</th>
+            <th className="px-4 py-3">Status</th>
+            <th className="px-4 py-3">Ações</th>
           </tr>
         </thead>
-
-        {/* Dados */}
         <tbody>
-          {events.map((event) => (
-            <tr
-              key={event.id}
-              className="border-t hover:bg-gray-50 transition cursor-pointer"
-              onClick={() => handleRowClick(event.id)}
-            >
-              <td className="px-4 py-3 font-medium">{event.title}</td>
-              <td className="px-4 py-3">{formatDate(event.eventDate)}</td>
-              <td className="px-4 py-3">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(
-                    event.status
-                  )}`}
-                >
-                  {getStatusBadge(event.status)}
-                </span>
-              </td>
-              <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                <span className="flex gap-3">
-                  <button
-                    onClick={() => onEdit?.(event.id)}
-                    className="text-blue-600 hover:text-blue-800 transition"
-                    title="Editar"
-                  >
-                    <SquarePen size={18} />
-                  </button>
-                  <button
-                    onClick={() => router.push(`/events/${event.id}/stats`)}
-                    className="text-purple-600 hover:text-purple-800 transition"
-                    title="Estatísticas"
-                  >
-                    <ChartNoAxesColumn size={18} />
-                  </button>
-                  <button
-                    onClick={() => onDelete?.(event.id)}
-                    className="text-red-600 hover:text-red-800 transition"
-                    title="Deletar"
-                  >
-                    <Trash size={18} />
-                  </button>
-                </span>
-              </td>
-            </tr>
-          ))}
+          {events.map((event) => {
+            const status = STATUS_LABELS[event.status] ?? STATUS_LABELS.UPCOMING;
+            return (
+              <tr key={event.id} className="border-t hover:bg-gray-50 transition">
+                <td className="px-4 py-3 font-medium text-gray-800">{event.title}</td>
+                <td className="px-4 py-3 text-sm text-gray-500">{formatDate(event.eventDate)}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-3 py-1 rounded-2xl text-xs font-medium ${status.className}`}>
+                    {status.label}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => onEdit(event.id)}
+                      className="text-blue-500 hover:text-blue-700 transition cursor-pointer"
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/events/overview?id=${event.id}`)}
+                      className="text-purple-500 hover:text-purple-700 transition cursor-pointer"
+                      title="Estatísticas"
+                    >
+                      <BarChart2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(event.id)}
+                      className="text-red-500 hover:text-red-700 transition cursor-pointer"
+                      title="Deletar"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

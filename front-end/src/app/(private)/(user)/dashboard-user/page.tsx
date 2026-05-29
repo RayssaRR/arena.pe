@@ -1,67 +1,81 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { getUserNameFromToken } from "@/lib/jwt-utils";
+import { resolvePublicAssetUrl } from "@/lib/api";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
 
 type UpcomingEvent = {
   id: string;
   title: string;
   description: string;
   eventDate: string;
+  imageUrl?: string;                          // ← adicionado
   category: { id: number; title: string } | null;
   ticketType: string;
   location: string;
 };
 
-type PastEvent = {
-  id: string;
-  title: string;
-  eventDate: string;
-  location: string;
-  status: "COMPARECEU" | "PERDEU";
-};
-
 function formatDateShort(dateStr: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).toUpperCase();
-}
-
-function formatDateLong(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).toUpperCase();
+  return date
+    .toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    .toUpperCase();
 }
 
 function UpcomingEventCard({ event }: { event: UpcomingEvent }) {
   const router = useRouter();
+  const imageUrl = resolvePublicAssetUrl(event.imageUrl);
+
   return (
-    <Card className="mx-auto w-full pt-0">
-      <CardHeader className="bg-black/70 text-white p-5">
-        <p className="bg-white p-1 rounded-md text-(--blue) font-bold w-fit px-4">
-          {event.category?.title ?? "Geral"}
-        </p>
+    <Card className="mx-auto w-full pt-0 overflow-hidden">
+
+      {/* Header com imagem real de fundo */}
+      <CardHeader className="relative h-36 p-0">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={event.title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gray-300" /> // fallback se não tiver imagem
+        )}
+        {/* Overlay escuro para o badge de categoria ficar legível */}
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="relative z-10 p-5">
+          <p className="bg-white p-1 rounded-md text-(--blue) font-bold w-fit px-4 text-sm">
+            {event.category?.title ?? "Geral"}
+          </p>
+        </div>
       </CardHeader>
+
       <CardContent className="space-y-2 p-5">
+        <p className="text-(--blue) font-bold text-sm">{formatDateShort(event.eventDate)}</p>
         <h4 className="body-lg font-semibold">{event.title}</h4>
         <p className="text-(--gray) text-sm line-clamp-2">{event.description}</p>
-        <div className="pt-2 space-y-1">
-          <p className="text-(--blue) font-bold text-sm">{formatDateShort(event.eventDate)}</p>
-          <p className="text-sm text-gray-500">Informações do assento</p>
-          <p className="text-sm font-medium">{event.ticketType}</p>
-        </div>
       </CardContent>
+
       <CardFooter className="flex justify-between gap-3 bg-white p-5">
-        <Button onClick={() => router.push(`/event-details/${event.id}`)} className="bg-(--blue) hover:bg-(--blue-hover) cursor-pointer">
-          Obter Ingresso
+        <Button
+          onClick={() => router.push(`/event-details/${event.id}`)}
+          className="bg-(--blue) hover:bg-(--blue-hover) cursor-pointer"
+        >
+          Ver Detalhes
         </Button>
-        <Button variant="outline" className="border-red-400 text-red-500 hover:bg-red-50 cursor-pointer">
+        <Button
+          variant="outline"
+          className="border-red-400 text-red-500 hover:bg-red-50 cursor-pointer"
+        >
           Cancelar
         </Button>
       </CardFooter>
@@ -83,8 +97,10 @@ export default function UserDashboard() {
       try {
         const token = localStorage.getItem("authToken");
         if (!token) return;
-        const upcomingRes = await fetch(`${BACKEND_URL}/user/tickets/upcoming`, { headers: { Authorization: `Bearer ${token}` } });
-        if (upcomingRes.ok) setUpcomingEvents(await upcomingRes.json());
+        const res = await fetch(`${BACKEND_URL}/user/tickets/upcoming`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) setUpcomingEvents(await res.json());
       } catch (err) {
         console.error("Erro ao carregar eventos:", err);
       } finally {
@@ -97,8 +113,6 @@ export default function UserDashboard() {
 
   return (
     <main className="p-8 min-h-screen bg-[#F5F7F8]">
-
-      {/* Boas vindas */}
       <header className="space-y-1 mb-8">
         <h1 className="title-h1">Bem vindo de volta, {userName}!</h1>
         <p className="subtitle">
@@ -106,7 +120,6 @@ export default function UserDashboard() {
         </p>
       </header>
 
-      {/* Próximos eventos */}
       <section className="mb-10">
         <div className="flex items-center justify-between mb-4">
           <h3 className="title-h3">Próximos Eventos</h3>
@@ -118,6 +131,7 @@ export default function UserDashboard() {
             Ver tudo
           </button>
         </div>
+
         {isLoading ? (
           <p className="text-sm text-muted-foreground animate-pulse">Carregando...</p>
         ) : upcomingEvents.length === 0 ? (
@@ -130,7 +144,6 @@ export default function UserDashboard() {
           </div>
         )}
       </section>
-
     </main>
   );
 }
