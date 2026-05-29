@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Category from "@/app/(private)/(user)/components/Category";
 import { Header } from "@/components/Header";
-import SearchBar from "@/app/(private)/(user)/components/Searchbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+import { resolvePublicAssetUrl } from "@/lib/api";
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
 
 type Event = {
   id: string;
@@ -37,13 +35,26 @@ function formatDate(dateStr: string): string {
 
 function EventCard({ event }: { event: Event }) {
   const router = useRouter();
+  const imageUrl = resolvePublicAssetUrl(event.imageUrl);
 
   return (
-    <Card className="mx-auto w-full pt-0">
-      <CardHeader className="bg-black/70 text-white p-5 min-h-20">
-        <p className="bg-white p-1 rounded-md text-(--blue) font-bold w-fit px-4 text-sm">
-          {event.category?.title ?? "Geral"}
-        </p>
+    <Card className="mx-auto w-full pt-0 overflow-hidden">
+      <CardHeader className="relative h-36 p-0">
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={event.title}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gray-300" />
+        )}
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="relative z-10 p-5">
+          <p className="bg-white p-1 rounded-md text-(--blue) font-bold w-fit px-4 text-sm">
+            {event.category?.title ?? "Geral"}
+          </p>
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-2 p-5">
@@ -66,7 +77,6 @@ function EventCard({ event }: { event: Event }) {
 
 export default function Home() {
   const router = useRouter();
-
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,7 +86,6 @@ export default function Home() {
       try {
         setIsLoading(true);
         setError(null);
-
         const res = await fetch(`${BACKEND_URL}/events`);
         if (!res.ok) throw new Error("Erro ao buscar eventos");
         const data: Event[] = await res.json();
@@ -106,7 +115,6 @@ export default function Home() {
           }}
         >
           <div className="absolute inset-0 bg-black/55 rounded-3xl" />
-
           <div className="relative z-10 space-y-2">
             <h2 className="title-h1 text-white">
               O coração da ação em Pernambuco
@@ -118,16 +126,12 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Content */}
+        {/* Eventos */}
         <div className="gap-8 mt-8 items-start">
-
           <section className="w-full">
             <div className="flex items-center justify-between mb-4">
               <h3 className="title-h3">Próximos Eventos</h3>
-
-              <Button
-                onClick={() => router.push("/event-discover")}
-              >
+              <Button onClick={() => router.push("/event-discover")}>
                 Ver todos
               </Button>
             </div>
@@ -156,7 +160,6 @@ export default function Home() {
               </div>
             )}
           </section>
-
         </div>
       </main>
     </div>
