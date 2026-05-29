@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ClipboardClock, ImageDown, Info, MapPin } from "lucide-react";
 import Link from "next/link";
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useState, useEffect, Suspense } from "react";
 import { getCategories, getEventById, uploadImageToPublicAssets, resolvePublicAssetUrl, Category } from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TICKET_LOCATIONS, TOTAL_CAPACITY } from "@/app/(private)/(admin)/components/TicketLocations";
@@ -90,7 +90,6 @@ export default function UpdateEventForm() {
         const resolvedUrl = resolvePublicAssetUrl(event.imageUrl);
         if (resolvedUrl) setImagePreview(resolvedUrl);
 
-        // Preencher setores existentes
         if (event.ticketSectors && event.ticketSectors.length > 0) {
           setSelectedSectors(
             event.ticketSectors.map((t) => ({
@@ -239,7 +238,7 @@ export default function UpdateEventForm() {
           eventDate: eventDateTime,
           imageUrl: formData.imageUrl,
           categoryId: parseInt(formData.categoryId),
-          tickets: [], // Backend ignora, mas enviamos array vazio por compatibilidade
+          tickets: [],
         },
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
       );
@@ -252,7 +251,6 @@ export default function UpdateEventForm() {
       const currentTickets = currentEvent.data.ticketSectors || [];
 
       // 3. Processar mudanças nos tickets
-      // Tickets para deletar (estavam antes, não estão mais)
       const ticketsToDelete = currentTickets.filter(
         (ct: any) => !selectedSectors.some((s) => s.location === ct.location)
       );
@@ -263,12 +261,10 @@ export default function UpdateEventForm() {
         );
       }
 
-      // Tickets para atualizar ou criar
       for (const sector of selectedSectors) {
         const existingTicket = currentTickets.find((ct: any) => ct.location === sector.location);
-        
+
         if (existingTicket) {
-          // Atualizar ticket existente
           await axios.put(
             `${BACKEND_URL}/ticket-models/${existingTicket.id}`,
             {
@@ -280,7 +276,6 @@ export default function UpdateEventForm() {
             { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
           );
         } else {
-          // Criar novo ticket
           await axios.post(
             `${BACKEND_URL}/ticket-models`,
             {
@@ -568,5 +563,20 @@ export default function UpdateEventForm() {
         </form>
       )}
     </main>
+  );
+}
+
+// Export default com Suspense envolvendo o componente que usa useSearchParams
+export default function UpdateEventForm() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-gray-500">Carregando...</p>
+        </div>
+      }
+    >
+      <UpdateEventFormContent />
+    </Suspense>
   );
 }

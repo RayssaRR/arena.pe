@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getEventById } from "@/lib/api";
@@ -134,7 +134,8 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   CANCELED: { label: "Cancelado", className: "bg-red-100 text-red-600" },
 };
 
-export default function EventStats() {
+// Componente interno que usa useSearchParams
+function EventStatsContent() {
   const searchParams = useSearchParams();
   const eventId = searchParams.get("id");
 
@@ -182,7 +183,6 @@ export default function EventStats() {
     loadData();
   }, [eventId]);
 
-  // Montar dados do gráfico
   const weeklyChartData =
     stats?.salesByPeriod?.map((w) => ({
       label: w.weekPeriod,
@@ -199,7 +199,7 @@ export default function EventStats() {
 
   const chartData = chartMode === "semana" ? weeklyChartData : dailyChartData;
 
-  const totalCapacity = (stats?.ticketsAvailable ?? 0);
+  const totalCapacity = stats?.ticketsAvailable ?? 0;
   const occupancyPct = totalCapacity > 0 ? ((stats?.ticketsSold ?? 0) / totalCapacity) * 100 : 0;
   const status = STATUS_LABELS[eventInfo?.status ?? "UPCOMING"] ?? STATUS_LABELS.UPCOMING;
 
@@ -323,5 +323,20 @@ export default function EventStats() {
         </article>
       </section>
     </main>
+  );
+}
+
+// Export default com Suspense envolvendo o componente que usa useSearchParams
+export default function EventStats() {
+  return (
+    <Suspense
+      fallback={
+        <main className="p-8 min-h-screen bg-[#F5F7F8] flex items-center justify-center">
+          <p className="text-gray-500 animate-pulse">Carregando estatísticas...</p>
+        </main>
+      }
+    >
+      <EventStatsContent />
+    </Suspense>
   );
 }
