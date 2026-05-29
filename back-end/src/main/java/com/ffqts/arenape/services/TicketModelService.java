@@ -5,6 +5,9 @@ import com.ffqts.arenape.models.event.Event;
 import com.ffqts.arenape.models.ticket.TicketModel;
 import com.ffqts.arenape.repositories.EventRepository;
 import com.ffqts.arenape.repositories.TicketModelRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,7 @@ public class TicketModelService {
     @Autowired
     private EventRepository eventRepository;
 
+    @Transactional
     public TicketModel createTicketModel(NewTicketModelForm form) {
         Event event = eventRepository.findById(form.eventId())
                 .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
@@ -51,15 +55,24 @@ public class TicketModelService {
         eventRepository.findById(eventId)
             .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
 
-        return ticketModelRepository.findByEvent_Id(eventId);
+        return ticketModelRepository.findByExpiredFalseAndEvent_Id(eventId);
     }
 
     public List<TicketModel> getAllTicketModels() {
         return ticketModelRepository.findAll();
     }
 
+    @Transactional
     public TicketModel updateTicketModel(UUID id, NewTicketModelForm form) {
         TicketModel ticketModel = getTicketModelById(id);
+
+        if (ticketModel == null) {
+            throw new IllegalArgumentException("Modelo de ticket não encontrado");
+        }
+
+        if (ticketModel.getPrice() == form.price()) {
+            return ticketModel;
+        }
 
         if (form.price() < 0) {
             throw new IllegalArgumentException("Preço não pode ser negativo");
@@ -69,20 +82,29 @@ public class TicketModelService {
             throw new IllegalArgumentException("Quantidade de tickets não pode ser negativa");
         }
 
-        Event event = eventRepository.findById(form.eventId())
-                .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
+        if (ticketModel.getTicketsSold() == 0) {
+          ticketModel.setPrice(form.price());
+          return ticketModelRepository.save(ticketModel);
+        }
 
-        ticketModel.setEvent(event);
-        ticketModel.setTicketLocation(form.ticketLocation());
-        ticketModel.setPrice(form.price());
-        ticketModel.setTicketsAvailable(form.ticketsAvailable());
+        TicketModel newTicketModel = new TicketModel(
+            ticketModel.getEvent(),
+            form.ticketLocation(),
+            form.price(),
+            form.ticketsAvailable()
+        );
 
-        return ticketModelRepository.save(ticketModel);
+        ticketModel.setExpired(true);
+
+        ticketModelRepository.save(ticketModel);
+        return ticketModelRepository.save(newTicketModel);
     }
 
+    @Transactional
     public void deleteTicketModel(UUID id) {
         TicketModel ticketModel = getTicketModelById(id);
-        ticketModelRepository.delete(ticketModel);
+        ticketModel.setExpired(true);
+        ticketModelRepository.save(ticketModel);
     }
 }
 

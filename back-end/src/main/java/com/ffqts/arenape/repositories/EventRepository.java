@@ -13,6 +13,6 @@ import java.util.UUID;
 
 public interface EventRepository extends JpaRepository<Event, UUID> {
     Optional<Event> findByTitle(String title);
-
-    List<Event> findByCategory_Id(Long categoryId);
+    List<Event> findByActiveTrue();
+    List<Event> findByActiveTrueAndCategory_Id(Long categoryId);
 }

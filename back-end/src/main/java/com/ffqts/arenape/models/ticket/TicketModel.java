@@ -31,12 +31,28 @@ public class TicketModel extends BaseEntity {
     @Min(value = 1, message = "Deve haver pelo menos 1 ticket disponível")
     private int ticketsAvailable;
 
+    @NotNull(message = "Quantidade de tickets é obrigatória")
+    @Min(value = 0, message = "Deve haver pelo menos 0 ticket vendido")
+    private int ticketsSold;
+
+    private boolean expired;
+
     public TicketModel() {}
     public TicketModel(Event event, TicketLocation ticketLocation, double price, int ticketsAvailable) {
         this.event = event;
         this.ticketLocation = ticketLocation;
         this.price = price;
         this.ticketsAvailable = ticketsAvailable;
+        this.ticketsSold = 0;
+        this.expired = false;
+    }
+
+    public TicketModel(TicketModel ticketModel) {
+        this.event = ticketModel.event;
+        this.ticketLocation = ticketModel.ticketLocation;
+        this.price = ticketModel.price;
+        this.ticketsAvailable = ticketModel.ticketsAvailable - ticketModel.ticketsSold;
+        this.ticketsSold = 0;
     }
 
     public UUID getId() {
@@ -73,5 +89,21 @@ public class TicketModel extends BaseEntity {
 
     public void setTicketsAvailable(int ticketsAvailable) {
         this.ticketsAvailable = ticketsAvailable;
+    }
+
+    public int getTicketsSold() {
+        return ticketsSold;
+    }
+
+    public void setTicketsSold(int ticketsSold) {
+        this.ticketsSold = ticketsSold;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
 }

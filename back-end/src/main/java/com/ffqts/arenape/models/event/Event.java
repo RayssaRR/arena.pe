@@ -56,6 +56,8 @@ public class Event extends BaseEntity {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserTicket> userTickets = new ArrayList<>();
 
+    private boolean active;
+
     public Event() {
     }
 
@@ -74,6 +76,7 @@ public class Event extends BaseEntity {
         this.imageUrl = imageUrl;
         this.category = category;
         this.status = EventStatus.UPCOMING;
+        this.active = true;
     }
 
     public UUID getId() {
@@ -142,5 +145,13 @@ public class Event extends BaseEntity {
 
     public void setUserTickets(List<UserTicket> userTickets) {
         this.userTickets = userTickets;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

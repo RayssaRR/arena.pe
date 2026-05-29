@@ -187,8 +187,12 @@ export interface EventResponse {
   description: string;
   eventDate: string;
   imageUrl: string;
+  capacity?: number;
+  ticketsSold?: number;
+  status?: "UPCOMING" | "ONGOING" | "FINISHED" | "COMPLETED";
   category?: Category;
-  ticketSectors?: TicketSector[];
+  isActive: boolean;
+  ticketSectors: TicketSector[];
 }
 
 export async function createEvent(payload: CreateEventRequest, token: string): Promise<EventResponse> {
@@ -197,6 +201,11 @@ export async function createEvent(payload: CreateEventRequest, token: string): P
 
 export async function getEvents(token?: string): Promise<EventResponse[]> {
   const url = `${BACKEND_BASE_URL}/events`;
+  return token ? getJsonWithAuth<EventResponse[]>(url, token) : getJson<EventResponse[]>(url);
+}
+
+export async function getEventsWithDeleted(token?: string): Promise<EventResponse[]> {
+  const url = `${BACKEND_BASE_URL}/events/all`;
   return token ? getJsonWithAuth<EventResponse[]>(url, token) : getJson<EventResponse[]>(url);
 }
 

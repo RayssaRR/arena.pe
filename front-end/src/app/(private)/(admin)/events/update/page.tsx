@@ -81,12 +81,12 @@ export default function UpdateEventForm() {
         if (resolvedUrl) setImagePreview(resolvedUrl);
 
         // Preencher setores existentes
-        if (event.tickets && event.tickets.length > 0) {
+        if (event.ticketSectors && event.ticketSectors.length > 0) {
           setSelectedSectors(
-            event.tickets.map((t) => ({
+            event.ticketSectors.map((t) => ({
               location: t.location,
               price: String(t.price),
-              capacity: String(t.ticketsAvailable),
+              capacity: String(t.ticketsAvailable - t.ticketsSold),
             }))
           );
         }
@@ -198,6 +198,7 @@ export default function UpdateEventForm() {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("Token não encontrado. Faça login novamente.");
 
+      // 1. Atualizar evento (sem tickets)
       await axios.put(
         `${BACKEND_URL}/events/${eventId}`,
         {
@@ -206,14 +207,60 @@ export default function UpdateEventForm() {
           eventDate: eventDateTime,
           imageUrl: formData.imageUrl,
           categoryId: parseInt(formData.categoryId),
-          tickets: selectedSectors.map((s) => ({
-            location: s.location,
-            price: parseFloat(s.price),
-            ticketsAvailable: parseInt(s.capacity),
-          })),
+          tickets: [], // Backend ignora, mas enviamos array vazio por compatibilidade
         },
         { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
       );
+
+      // 2. Buscar tickets atuais do evento
+      const currentEvent = await axios.get(
+        `${BACKEND_URL}/events/${eventId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const currentTickets = currentEvent.data.ticketSectors || [];
+
+      // 3. Processar mudanças nos tickets
+      // Tickets para deletar (estavam antes, não estão mais)
+      const ticketsToDelete = currentTickets.filter(
+        (ct: any) => !selectedSectors.some((s) => s.location === ct.location)
+      );
+      for (const ticket of ticketsToDelete) {
+        await axios.delete(
+          `${BACKEND_URL}/ticket-models/${ticket.id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      // Tickets para atualizar ou criar
+      for (const sector of selectedSectors) {
+        const existingTicket = currentTickets.find((ct: any) => ct.location === sector.location);
+        
+        if (existingTicket) {
+          // Atualizar ticket existente
+          await axios.put(
+            `${BACKEND_URL}/ticket-models/${existingTicket.id}`,
+            {
+              eventId: eventId,
+              ticketLocation: sector.location,
+              price: parseFloat(sector.price),
+              ticketsAvailable: parseInt(sector.capacity),
+            },
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+          );
+        } else {
+          // Criar novo ticket
+          await axios.post(
+            `${BACKEND_URL}/ticket-models`,
+            {
+              eventId: eventId,
+              ticketLocation: sector.location,
+              price: parseFloat(sector.price),
+              ticketsAvailable: parseInt(sector.capacity),
+            },
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+          );
+        }
+      }
 
       setSuccessMessage("Evento atualizado com sucesso!");
       setTimeout(() => router.push("/dashboard-admin"), 2000);
@@ -371,8 +418,7 @@ export default function UpdateEventForm() {
                             max={capacity}
                             placeholder={String(capacity)}
                             value={sector?.capacity ?? ""}
-                            onChange={(e) => updateSector(value, "capacity", e.target.value)}
-                            disabled={isSubmitting}
+                            disabled={true}
                             className={`h-8 text-sm ${capExceeded ? "border-red-400" : ""}`}
                           />
                         </div>

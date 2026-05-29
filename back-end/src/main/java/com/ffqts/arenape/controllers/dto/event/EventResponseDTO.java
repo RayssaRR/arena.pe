@@ -14,6 +14,7 @@ public record EventResponseDTO(
     int capacity,
     int ticketsSold,
     EventStatus status,
+    boolean isActive,
     String imageUrl,
     Category category,
     List<TicketSectorDTO> ticketSectors
