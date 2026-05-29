@@ -50,7 +50,7 @@ export default function RecentEventsCard({ events, onDelete, onEdit }: RecentEve
         </thead>
         <tbody>
           {events.map((event) => {
-            const status = STATUS_LABELS[event.status] ?? STATUS_LABELS.UPCOMING;
+            const status = STATUS_LABELS[event.status!] ?? STATUS_LABELS.UPCOMING;
             return (
               <tr key={event.id} className="border-t hover:bg-gray-50 transition">
                 <td className="px-4 py-3 font-medium text-gray-800">{event.title}</td>
