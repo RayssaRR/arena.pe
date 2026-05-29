@@ -194,6 +194,16 @@ export function Header() {
                   </Link>
                 )}
 
+                {isAdmin && (
+                  <Link
+                    href="/tickets/validate"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    onClick={() => setShowMenu(false)}
+                  >
+                    Validar Ingresso
+                  </Link>
+                )}
+
                 <div className="border-t border-gray-200 pt-2">
                   <button
                     onClick={handleLogout}
