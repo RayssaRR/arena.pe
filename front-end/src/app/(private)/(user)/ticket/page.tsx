@@ -1,9 +1,9 @@
 "use client"
 
-import { Suspense, useEffect, useState, useRef } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { CheckCircle, Download, Printer, MapPin, Tag, Users, Calendar } from "lucide-react"
+import { CheckCircle, MapPin, Tag, Users, Calendar } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { getTicketById, UserTicketResponse } from "@/lib/api"
 
@@ -49,7 +49,6 @@ function getTicketStatusColor(status: string): string {
 function TicketContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const ticketRef = useRef<HTMLDivElement>(null)
 
   const ticketId = searchParams?.get("ticketId") ?? ""
 
@@ -82,156 +81,6 @@ function TicketContent() {
     fetchTicket()
   }, [ticketId])
 
-  const handlePrint = () => {
-    if (!ticket) return
-    const printWindow = window.open("", "_blank", "width=600,height=800")
-    if (!printWindow || !ticketRef.current) return
-
-    const ticketHTML = ticketRef.current.innerHTML
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-        <head>
-          <meta charset="UTF-8" />
-          <title>Ingresso - ${ticket.eventTitle}</title>
-          <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: white; padding: 32px; display: flex; justify-content: center; }
-            .ticket { width: 480px; border: 1px solid #e5e7eb; border-radius: 20px; overflow: hidden; }
-            .ticket-header { background: #2563eb; color: white; padding: 32px; }
-            .ticket-header .venue { font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-            .ticket-header .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-            .ticket-header .date { font-size: 13px; color: rgba(255,255,255,0.8); }
-            .divider { border-top: 2px dashed #e5e7eb; margin: 0 16px; }
-            .ticket-body { padding: 32px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-            .field label { display: block; font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-            .field .value { font-size: 14px; font-weight: 600; color: #111827; }
-            .field .sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
-            .qr-section { border-top: 1px solid #e5e7eb; padding-top: 24px; text-align: center; }
-            .qr-placeholder { width: 128px; height: 128px; border: 2px dashed #d1d5db; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
-            .qr-placeholder p { font-size: 11px; color: #9ca3af; }
-            .qr-hint { font-size: 11px; color: #9ca3af; }
-            @media print { body { padding: 16px; } }
-          </style>
-        </head>
-        <body>
-          <div class="ticket">
-            <div class="ticket-header">
-              <div class="venue">Arena Pernambuco</div>
-              <div class="title">${ticket.eventTitle}</div>
-              <div class="date">${formatDate(ticket.eventDate)}</div>
-            </div>
-            <div class="divider"></div>
-            <div class="ticket-body">
-              <div class="grid">
-                <div class="field">
-                  <label>Local</label>
-                  <div class="value">Arena Pernambuco</div>
-                  <div class="sub">São Lourenço da Mata, PE</div>
-                </div>
-                <div class="field">
-                  <label>Setor</label>
-                  <div class="value">${ticket.location}</div>
-                </div>
-                <div class="field">
-                  <label>Preço</label>
-                  <div class="value">${fmt(ticket.price)}</div>
-                </div>
-                <div class="field">
-                  <label>Status</label>
-                  <div class="value">${getTicketStatusLabel(ticket.ticketStatus)}</div>
-                </div>
-              </div>
-              <div class="qr-section">
-                <div class="qr-placeholder"><p>QR Code<br/>disponível em breve</p></div>
-                <p class="qr-hint">Apresente na entrada do evento</p>
-              </div>
-            </div>
-          </div>
-          <script>window.onload = () => { window.print(); window.onafterprint = () => window.close(); }<\/script>
-        </body>
-      </html>
-    `)
-    printWindow.document.close()
-  }
-
-  const handleDownload = () => {
-    if (!ticket) return
-    const content = `
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-        <head>
-          <meta charset="UTF-8" />
-          <title>Ingresso - ${ticket.eventTitle}</title>
-          <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; }
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: white; padding: 32px; display: flex; justify-content: center; }
-            .ticket { width: 480px; border: 1px solid #e5e7eb; border-radius: 20px; overflow: hidden; }
-            .ticket-header { background: #2563eb; color: white; padding: 32px; }
-            .ticket-header .venue { font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
-            .ticket-header .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-            .ticket-header .date { font-size: 13px; color: rgba(255,255,255,0.8); }
-            .divider { border-top: 2px dashed #e5e7eb; margin: 0 16px; }
-            .ticket-body { padding: 32px; }
-            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
-            .field label { display: block; font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
-            .field .value { font-size: 14px; font-weight: 600; color: #111827; }
-            .field .sub { font-size: 12px; color: #6b7280; margin-top: 2px; }
-            .qr-section { border-top: 1px solid #e5e7eb; padding-top: 24px; text-align: center; }
-            .qr-placeholder { width: 128px; height: 128px; border: 2px dashed #d1d5db; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
-            .qr-placeholder p { font-size: 11px; color: #9ca3af; }
-            .qr-hint { font-size: 11px; color: #9ca3af; }
-          </style>
-        </head>
-        <body>
-          <div class="ticket">
-            <div class="ticket-header">
-              <div class="venue">Arena Pernambuco</div>
-              <div class="title">${ticket.eventTitle}</div>
-              <div class="date">${formatDate(ticket.eventDate)}</div>
-            </div>
-            <div class="divider"></div>
-            <div class="ticket-body">
-              <div class="grid">
-                <div class="field">
-                  <label>Local</label>
-                  <div class="value">Arena Pernambuco</div>
-                  <div class="sub">São Lourenço da Mata, PE</div>
-                </div>
-                <div class="field">
-                  <label>Setor</label>
-                  <div class="value">${ticket.location}</div>
-                </div>
-                <div class="field">
-                  <label>Preço</label>
-                  <div class="value">${fmt(ticket.price)}</div>
-                </div>
-                <div class="field">
-                  <label>Status</label>
-                  <div class="value">${getTicketStatusLabel(ticket.ticketStatus)}</div>
-                </div>
-              </div>
-              <div class="qr-section">
-                <div class="qr-placeholder"><p>QR Code<br/>disponível em breve</p></div>
-                <p class="qr-hint">Apresente na entrada do evento</p>
-              </div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `
-
-    const blob = new Blob([content], { type: "text/html" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `ingresso-${ticket.eventTitle.replace(/\s+/g, "-").toLowerCase()}.html`
-    a.click()
-    URL.revokeObjectURL(url)
-  }
-
   const qrValue = ticket?.ticketId
     ? `${BACKEND_URL}/reservation/tickets/${ticket.ticketId}/consume`
     : "pending"
@@ -259,7 +108,6 @@ function TicketContent() {
 
   return (
     <div className="min-h-screen bg-[#F5F7F8]">
-
       <main className="flex flex-col items-center p-8">
 
         {/* Confirmação */}
@@ -270,7 +118,7 @@ function TicketContent() {
         </div>
 
         {/* Ticket visual */}
-        <div ref={ticketRef} className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden">
 
           {/* Header azul */}
           <div className="bg-blue-600 p-8 text-white space-y-1">
@@ -344,21 +192,6 @@ function TicketContent() {
 
         {/* Ações */}
         <div className="flex gap-4 mt-8">
-          <Button
-            onClick={handleDownload}
-            className="bg-blue-600 hover:bg-blue-700 cursor-pointer flex items-center gap-2 px-6"
-          >
-            <Download className="w-4 h-4" />
-            Baixar PDF
-          </Button>
-          <Button
-            onClick={handlePrint}
-            variant="outline"
-            className="cursor-pointer flex items-center gap-2 px-6"
-          >
-            <Printer className="w-4 h-4" />
-            Imprimir
-          </Button>
           <Button
             onClick={() => router.push("/dashboard-user")}
             variant="secondary"

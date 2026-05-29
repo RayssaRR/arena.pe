@@ -72,18 +72,15 @@ public class EventStatisticsService {
             LocalDateTime weekStart = now.minusWeeks(weekOffset).truncatedTo(ChronoUnit.DAYS).withHour(0).withMinute(0).withSecond(0);
             LocalDateTime weekEnd = weekStart.plusDays(7);
 
-            // Filtrar tickets da semana
             List<UserTicket> weekTickets = soldTickets.stream()
                 .filter(ticket -> ticket.getCreatedAt().isAfter(weekStart) && ticket.getCreatedAt().isBefore(weekEnd))
                 .collect(Collectors.toList());
 
-            // Calcular totais da semana
             int weekTicketCount = weekTickets.size();
             double weekRevenue = weekTickets.stream()
                 .mapToDouble(ticket -> ticket.getTicketModel().getPrice())
                 .sum();
 
-            // Calcular decomposição diária para esta semana
             List<TicketSalesPeriodDTO> dailyBreakdown = calculateDailyBreakdownForWeek(weekTickets, weekStart);
 
             String weekPeriod = String.format("Semana de %s", weekStart.toLocalDate());

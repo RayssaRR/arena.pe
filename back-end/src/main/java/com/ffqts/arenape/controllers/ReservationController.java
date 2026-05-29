@@ -2,6 +2,7 @@ package com.ffqts.arenape.controllers;
 
 import com.ffqts.arenape.controllers.dto.event.PagedUserEventsDTO;
 import com.ffqts.arenape.controllers.dto.reservation.NewReservationForm;
+import com.ffqts.arenape.controllers.dto.ticket.ConsumeTicketResponseDTO;
 import com.ffqts.arenape.controllers.dto.ticket.PagedUserTicketsDTO;
 import com.ffqts.arenape.controllers.dto.ticket.TicketCancellationResponseDTO;
 import com.ffqts.arenape.controllers.utils.GetEmailFromTokenRequest;
@@ -155,6 +156,13 @@ public class ReservationController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/admin/{ticketId}")
+    public ResponseEntity<ConsumeTicketResponseDTO> getTicketByIdAdmin(@PathVariable String ticketId) {
+        var ticket = userTicketService.getTicketByIdForAdmin(UUID.fromString(ticketId));
+        return ResponseEntity.ok(ticket);
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

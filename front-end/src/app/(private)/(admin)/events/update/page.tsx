@@ -31,7 +31,7 @@ interface FieldErrors {
   sectors?: string;
 }
 
-export default function UpdateEventForm() {
+function UpdateEventFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const eventId = searchParams.get("id");

@@ -2,19 +2,18 @@
 
 import { useState } from "react";
 import { CheckCircle, XCircle, Ticket, Loader2, ShieldCheck } from "lucide-react";
+import { getJson, getJsonWithAuth } from "@/lib/api";
 
 type TicketStatus = "idle" | "loading" | "found" | "not-found" | "validating" | "success" | "error";
 
 interface TicketData {
-  id: string;
-  ownerName: string;
-  ownerEmail: string;
-  eventName: string;
+  ticketId: string;
+  userName: string;
   eventDate: string;
-  eventLocation: string;
-  seatInfo?: string;
-  used: boolean;
+  ticketStatus: any;
 }
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
 
 export default function ValidateTicketPage() {
   const [ticketId, setTicketId] = useState("");
@@ -22,19 +21,29 @@ export default function ValidateTicketPage() {
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
+  console.log(ticketData);
+  
+
+  async function getTicket(token?: string): Promise<TicketData> {
+    const url = `${BACKEND_URL}/reservation/admin/${ticketId}`;
+    return token ? getJsonWithAuth<TicketData>(url, token) : getJson<TicketData>(url);
+  }
+
+  async function consumeTicket(token?: string): Promise<TicketData> {
+    const url = `${BACKEND_URL}/reservation/tickets/${ticketId}/consume`;
+    console.log(url);
+    
+    return getJsonWithAuth<TicketData>(url, token!);
+  }
+
   const handleSearch = async () => {
     if (!ticketId.trim()) return;
     setStatus("loading");
     setTicketData(null);
     setErrorMsg("");
     try {
-      const res = await fetch(`/api/tickets/${ticketId.trim()}`);
-      if (!res.ok) {
-        setStatus("not-found");
-        setErrorMsg("Ingresso não encontrado. Verifique o ID e tente novamente.");
-        return;
-      }
-      const data: TicketData = await res.json();
+      const token = localStorage.getItem("authToken");
+      const data: TicketData = await getTicket(token!);
       setTicketData(data);
       setStatus("found");
     } catch {
@@ -47,13 +56,10 @@ export default function ValidateTicketPage() {
     if (!ticketData) return;
     setStatus("validating");
     try {
-      const res = await fetch(`/api/tickets/${ticketData.id}/validate`, {
-        method: "POST",
-      });
-      if (!res.ok) {
-        const err = await res.json();
+      const token = localStorage.getItem("authToken");
+      const res = await consumeTicket(token!);
+      if (!res) {
         setStatus("error");
-        setErrorMsg(err.message || "Falha ao validar o ingresso.");
         return;
       }
       setStatus("success");
@@ -140,11 +146,11 @@ export default function ValidateTicketPage() {
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Ticket size={14} className="text-blue-400" />
-                  <span className="text-xs font-mono text-gray-400">{ticketData.id}</span>
+                  <span className="text-xs font-mono text-gray-400">{ticketData.ticketId}</span>
                 </div>
-                {ticketData.used ? (
+                {ticketData.ticketStatus !== 'VALIDO' ? (
                   <span className="text-xs font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                    Já utilizado
+                    Expirou ou já foi utilizado
                   </span>
                 ) : (
                   <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
@@ -155,17 +161,12 @@ export default function ValidateTicketPage() {
 
               <div className="px-4 py-3">
                 <p className="text-xs text-gray-400 mb-0.5">Titular</p>
-                <p className="text-sm font-semibold text-gray-900">{ticketData.ownerName}</p>
-                <p className="text-xs text-gray-500">{ticketData.ownerEmail}</p>
+                <p className="text-sm font-semibold text-gray-900">{ticketData.userName}</p>
               </div>
 
               <div className="px-4 py-3">
                 <p className="text-xs text-gray-400 mb-0.5">Evento</p>
-                <p className="text-sm font-semibold text-gray-900">{ticketData.eventName}</p>
-                <p className="text-xs text-gray-500">{ticketData.eventDate} · {ticketData.eventLocation}</p>
-                {ticketData.seatInfo && (
-                  <p className="text-xs text-blue-500 font-mono mt-1">{ticketData.seatInfo}</p>
-                )}
+                <p className="text-xs text-gray-500">{ticketData.eventDate}</p>
               </div>
             </div>
 
@@ -176,7 +177,7 @@ export default function ValidateTicketPage() {
               </div>
             )}
 
-            {!ticketData.used ? (
+            {ticketData.ticketStatus == 'VALIDO' ? (
               <div className="flex gap-2">
                 <button
                   onClick={handleReset}
@@ -222,8 +223,8 @@ export default function ValidateTicketPage() {
               <CheckCircle size={28} className="text-emerald-500" />
             </div>
             <h2 className="text-lg font-bold text-gray-900 mb-1">Entrada confirmada!</h2>
-            <p className="text-sm text-gray-500 mb-0.5">{ticketData?.ownerName}</p>
-            <p className="text-xs text-gray-400 font-mono mb-6">{ticketData?.id}</p>
+            <p className="text-sm text-gray-500 mb-0.5">{ticketData?.userName}</p>
+            <p className="text-xs text-gray-400 font-mono mb-6">{ticketData?.ticketId}</p>
             <button
               onClick={handleReset}
               className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-lg px-6 py-2.5

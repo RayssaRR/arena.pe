@@ -163,12 +163,6 @@ export default function RegisterForm({ onSuccess, onError }: RegisterFormProps) 
       <Button className="bg-(--blue) py-4 cursor-pointer" type="submit" disabled={isLoading}>
         {isLoading ? "Criando conta..." : "Criar uma conta"}
       </Button>
-      <p className="self-center text-gray-500">Ou continue com</p>
-
-      <div className="flex gap-5">
-        <Button type="button" className={buttonStyle} disabled={isLoading}>Google</Button>
-        <Button type="button" className={buttonStyle} disabled={isLoading}>Facebook</Button>
-      </div>
     </form>
   );
 }

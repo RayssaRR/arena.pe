@@ -93,30 +93,6 @@ public class EventService {
         );
     }
 
-
-    private void updateEventStatuses() {
-        List<Event> todos = eventRepository.findAll();
-        LocalDateTime now = LocalDateTime.now();
-        List<Event> toUpdate = new ArrayList<>();
-
-        for (Event event : todos) {
-            if (event.getStatus() == EventStatus.CANCELED) continue;
-
-            EventStatus computed = now.isBefore(event.getEventDate())
-                ? EventStatus.UPCOMING
-                : EventStatus.COMPLETED;
-
-            if (event.getStatus() != computed) {
-                event.setStatus(computed);
-                toUpdate.add(event);
-            }
-        }
-
-        if (!toUpdate.isEmpty()) {
-            eventRepository.saveAll(toUpdate);
-        }
-    }
-
     public List<EventResponseDTO> getFilteredEventsWithDetails(
             Long categoryId
     ) {

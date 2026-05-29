@@ -42,7 +42,9 @@ export default function Page() {
       >
         <div className="absolute inset-0 bg-black/55" />
 
-        <h1 className="relative z-10 text-white font-bold text-2xl">Arena.pe</h1>
+        <a href="/" className="w-fit z-10 flex items-center gap-2 cursor-pointer">
+          <h1 className="relative z-10 text-white font-bold text-2xl">Arena.pe</h1>
+        </a>
 
         <div className="relative z-10">
           <h2 className="text-white text-3xl font-bold leading-tight mb-3">

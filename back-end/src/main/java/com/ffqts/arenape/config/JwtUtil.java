@@ -9,9 +9,8 @@ import java.util.Date;
 
 public class JwtUtil {
 
-    // Chave segura de 256 bits
     private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long EXPIRATION = 1000 * 60 * 60; // 1 hora
+    private static final long EXPIRATION = 1000 * 60 * 60;
 
     public static String generateToken(String email, String role, String name) {
         return Jwts.builder()
