@@ -49,6 +49,7 @@ public class EventService {
 
     public List<EventResponseDTO> getAllEventsWithDeleted() { 
       return eventRepository.findAll().stream()
+            .sorted((e1, e2) -> e2.getCreatedAt().compareTo(e1.getCreatedAt()))
             .map(this::convertEventToResponseDTO)
             .toList();
     }

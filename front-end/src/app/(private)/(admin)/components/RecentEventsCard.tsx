@@ -50,7 +50,7 @@ export default function RecentEventsCard({ events, onDelete, onEdit }: RecentEve
             ) : { label: "Inativo", className: "bg-red-100 text-red-800" };
             return (
               <tr key={event.id} className="border-t hover:bg-gray-50 transition">
-                <td className="px-4 py-3 font-medium text-gray-800">{event.title}</td>
+                <td onClick={() => router.push(`/event-details?id=${event.id}`)} className="px-4 py-3 font-medium text-gray-800 cursor-pointer">{event.title}</td>
                 <td className="px-4 py-3 text-sm text-gray-500">{formatDate(event.eventDate)}</td>
                 <td className="px-4 py-3">
                   <span className={`px-3 py-1 rounded-2xl text-xs font-medium ${status.className}`}>

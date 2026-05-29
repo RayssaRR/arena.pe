@@ -117,7 +117,7 @@ function MyTicketsContent() {
               </tr>
             </thead>
             <tbody>
-              {tickets.map((ticket) => {
+              {tickets.map((ticket, index) => {
                 const eventStatus = STATUS_CONFIG[ticket.eventStatus] ?? STATUS_CONFIG.UPCOMING;
                 const ticketStatus = TICKET_STATUS_CONFIG[ticket.ticketStatus];
                 return (
@@ -126,7 +126,7 @@ function MyTicketsContent() {
                     className="border-t hover:bg-gray-50 transition cursor-pointer"
                     onClick={() => router.push(`/ticket?ticketId=${ticket.ticketId}`)}
                   >
-                    <td className="px-5 py-4 font-medium text-gray-800">{ticket.eventTitle}</td>
+                    <td className="px-5 py-4 font-medium text-gray-800">{ticket.eventTitle} #{index + 1}</td>
                     <td className="px-5 py-4 text-sm text-gray-500">{formatDate(ticket.eventDate)}</td>
                     <td className="px-5 py-4 text-sm text-gray-500">{ticket.location}</td>
                     <td className="px-5 py-4 text-sm font-medium text-gray-800">R$ {ticket.price.toFixed(2)}</td>

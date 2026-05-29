@@ -258,7 +258,6 @@ function TicketContent() {
 
   return (
     <div className="min-h-screen bg-[#F5F7F8]">
-      <Header />
 
       <main className="flex flex-col items-center p-8">
 

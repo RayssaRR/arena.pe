@@ -133,6 +133,12 @@ function EventDetailsContent() {
             <p className="bg-(--blue) p-1 rounded-full font-bold w-fit px-4">
               {event.category?.title ?? "Geral"}
             </p>
+
+            {!event.isActive && (
+              <p className="bg-(--red) p-1 rounded-full font-bold w-fit px-4">
+              Desativado
+            </p>
+            )}
             <p className="title-h1 text-white">{event.title}</p>
             <div className="flex gap-10">
               <div className="flex gap-2">
@@ -153,20 +159,22 @@ function EventDetailsContent() {
             <Details description={event.description} />
           </div>
           <div className="w-full">
-            <BuyTicketCard
-              sectors={
-                event.ticketSectors?.map((sector) => ({
-                  id: sector.id,
-                  location: sector.location,
-                  price: sector.price,
-                  ticketsAvailable: sector.ticketsAvailable,
-                  ticketsSold: sector.ticketsSold,
-                })) ?? []
-              }
-              eventId={event.id}
-              eventTitle={event.title}
-              eventDate={event.eventDate}
-            />
+            {event.isActive && (
+              <BuyTicketCard
+                sectors={
+                  event.ticketSectors?.map((sector) => ({
+                    id: sector.id,
+                    location: sector.location,
+                    price: sector.price,
+                    ticketsAvailable: sector.ticketsAvailable,
+                    ticketsSold: sector.ticketsSold,
+                  })) ?? []
+                }
+                eventId={event.id}
+                eventTitle={event.title}
+                eventDate={event.eventDate}
+              />
+            )}
           </div>
         </section>
       </main>

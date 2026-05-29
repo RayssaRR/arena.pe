@@ -199,7 +199,7 @@ export default function EventStats() {
 
   const chartData = chartMode === "semana" ? weeklyChartData : dailyChartData;
 
-  const totalCapacity = (stats?.ticketsSold ?? 0) + (stats?.ticketsAvailable ?? 0);
+  const totalCapacity = (stats?.ticketsAvailable ?? 0);
   const occupancyPct = totalCapacity > 0 ? ((stats?.ticketsSold ?? 0) / totalCapacity) * 100 : 0;
   const status = STATUS_LABELS[eventInfo?.status ?? "UPCOMING"] ?? STATUS_LABELS.UPCOMING;
 

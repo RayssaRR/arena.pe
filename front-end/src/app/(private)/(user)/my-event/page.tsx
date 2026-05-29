@@ -12,10 +12,9 @@ type UserTicket = {
   ticketId: string;
   eventTitle: string;
   eventId: string;
-  ticketModelTitle: string;
   price: number;
   location: string;
-  isValid: boolean;
+  ticketStatus: "VALIDO" | "RESGATADO" | "CANCELADO" | "EXPIRADO";
   createdAt: string;
 };
 
@@ -25,6 +24,13 @@ type PagedTickets = {
   totalPages: number;
   currentPage: number;
   isLast: boolean;
+};
+
+const TICKET_STATUS_CONFIG = {
+  VALIDO: { label: "Válido", className: "bg-green-200 text-green-700" },
+  RESGATADO: { label: "Resgatado", className: "bg-blue-200 text-blue-700" },
+  CANCELADO: { label: "Cancelado", className: "bg-red-200 text-red-700" },
+  EXPIRADO: { label: "Expirado", className: "bg-gray-200 text-gray-700" },
 };
 
 function formatDate(dateStr: string): string {
@@ -51,27 +57,17 @@ function fmt(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
-function TicketCard({ ticket, onViewTicket }: { ticket: UserTicket; onViewTicket: (id: string) => void }) {
+function TicketCard({ ticket, onViewTicket, index }: { ticket: UserTicket; onViewTicket: (id: string) => void; index: number }) {
   return (
     <div className="bg-white border rounded-2xl overflow-hidden hover:shadow-md transition-shadow">
       {/* Header colorido */}
       <div className="bg-blue-600 px-5 py-4 text-white flex items-center justify-between">
         <div>
           <p className="text-xs text-blue-200 uppercase tracking-wider">Arena Pernambuco</p>
-          <p className="font-semibold text-sm mt-0.5">{ticket.ticketModelTitle || ticket.location}</p>
+          <p className="font-semibold text-sm mt-0.5">{ticket.location} #{index + 1}</p>
         </div>
-        <div className="flex items-center gap-1.5">
-          {ticket.isValid ? (
-            <>
-              <CheckCircle className="w-4 h-4 text-green-300" />
-              <span className="text-xs font-medium text-green-300">Válido</span>
-            </>
-          ) : (
-            <>
-              <XCircle className="w-4 h-4 text-red-300" />
-              <span className="text-xs font-medium text-red-300">Inválido</span>
-            </>
-          )}
+        <div className={`py-0.5 px-2 rounded-md ${TICKET_STATUS_CONFIG[ticket.ticketStatus].className}`}>
+          {TICKET_STATUS_CONFIG[ticket.ticketStatus].label}
         </div>
       </div>
 
@@ -157,6 +153,9 @@ function MyEventContent() {
         );
         if (!res.ok) throw new Error("Erro ao buscar ingressos.");
         const data: PagedTickets = await res.json();
+
+        console.log(data);
+        
         setTickets(data.content);
         setTotalPages(data.totalPages);
       } catch {
@@ -250,11 +249,12 @@ function MyEventContent() {
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-4">
-              {tickets.map((ticket) => (
+              {tickets.map((ticket, index) => (
                 <TicketCard
                   key={ticket.ticketId}
                   ticket={ticket}
                   onViewTicket={(id) => router.push(`/ticket?ticketId=${id}`)}
+                  index={index}
                 />
               ))}
             </div>

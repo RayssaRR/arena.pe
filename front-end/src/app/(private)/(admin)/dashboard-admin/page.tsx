@@ -75,7 +75,7 @@ export default function AdminDashboard() {
       await axios.delete(`${BACKEND_URL}/events/${eventId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      router.refresh();
+      window.location.reload();
     } catch (err) {
       console.error("Erro ao deletar evento:", err);
       alert("Erro ao deletar evento. Tente novamente.");
