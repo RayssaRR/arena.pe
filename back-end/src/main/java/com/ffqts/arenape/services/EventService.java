@@ -13,6 +13,9 @@ import com.ffqts.arenape.repositories.EventRepository;
 import com.ffqts.arenape.repositories.TicketModelRepository;
 import com.ffqts.arenape.repositories.UserRepository;
 import com.ffqts.arenape.repositories.UserTicketRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,16 +45,22 @@ public class EventService {
     @Autowired
     private TicketModelService ticketModelService;
 
-    public List<Event> getAllEvents() { return eventRepository.findAll(); }
+    public List<Event> getAllEvents() { return eventRepository.findByActiveTrue(); }
+
+    public List<EventResponseDTO> getAllEventsWithDeleted() { 
+      return eventRepository.findAll().stream()
+            .map(this::convertEventToResponseDTO)
+            .toList();
+    }
 
     public List<EventResponseDTO> getAllEventsWithDetails() {
-        return eventRepository.findAll().stream()
+        return eventRepository.findByActiveTrue().stream()
             .map(this::convertEventToResponseDTO)
             .toList();
     }
 
     private EventResponseDTO convertEventToResponseDTO(Event event) {
-        List<TicketModel> ticketModels = ticketModelRepository.findByEvent_Id(event.getId());
+        List<TicketModel> ticketModels = ticketModelRepository.findByExpiredFalseAndEvent_Id(event.getId());
         int totalCapacity = ticketModels.stream()
             .mapToInt(TicketModel::getTicketsAvailable)
             .sum();
@@ -64,7 +73,7 @@ public class EventService {
                 tm.getTicketLocation(),
                 tm.getPrice(),
                 tm.getTicketsAvailable(),
-                userTicketRepository.countByTicketModel_Id(tm.getId())
+                tm.getTicketsSold()
             ))
             .toList();
         
@@ -76,6 +85,7 @@ public class EventService {
             totalCapacity,
             totalTicketsSold,
             event.getStatus(),
+            event.isActive(),
             event.getImageUrl(),
             event.getCategory(),
             sectors
@@ -109,7 +119,7 @@ public class EventService {
     public List<EventResponseDTO> getFilteredEventsWithDetails(
             Long categoryId
     ) {
-        List<Event> filteredEvents = eventRepository.findByCategory_Id(categoryId);
+        List<Event> filteredEvents = eventRepository.findByActiveTrueAndCategory_Id(categoryId);
         return filteredEvents.stream()
             .map(this::convertEventToResponseDTO)
             .toList();
@@ -125,6 +135,7 @@ public class EventService {
         return convertEventToResponseDTO(event);
     }
 
+    @Transactional
     public Event createEvent(NewEventForm newEventForm, String creatorEmail) {
         if (eventRepository.findByTitle(newEventForm.title()).isPresent()) {
             throw new IllegalArgumentException("Evento com esse título já existe");
@@ -172,12 +183,15 @@ public class EventService {
         return eventRepository.save(currentEvent);
     }
 
-    public void deleteEvent(String eventId, String creatorEmail) {
+    @Transactional
+    public void deleteEvent(String eventId) {
         var event = eventRepository.findById(UUID.fromString(eventId))
             .orElseThrow(() -> new IllegalArgumentException("Evento não encontrado"));
-        eventRepository.delete(event);
+        event.setActive(false);
+        eventRepository.save(event);
     }
 
+    @Transactional
     private void updateEventData(NewEventForm updatedEvent, Event currentEvent) {
         currentEvent.setTitle(updatedEvent.title());
         currentEvent.setDescription(updatedEvent.description());

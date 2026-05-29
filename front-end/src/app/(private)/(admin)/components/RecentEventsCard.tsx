@@ -13,13 +13,6 @@ function formatDate(dateStr: string): string {
   }).toUpperCase();
 }
 
-const STATUS_LABELS: Record<string, { label: string; className: string }> = {
-  UPCOMING: { label: "Próximo", className: "bg-blue-100 text-blue-700" },
-  ONGOING: { label: "Em andamento", className: "bg-yellow-100 text-yellow-700" },
-  COMPLETED: { label: "Concluído", className: "bg-gray-100 text-gray-600" },
-  CANCELED: { label: "Cancelado", className: "bg-red-100 text-red-600" },
-};
-
 interface RecentEventsCardProps {
   events: EventResponse[];
   onDelete: (id: string) => void;
@@ -50,7 +43,11 @@ export default function RecentEventsCard({ events, onDelete, onEdit }: RecentEve
         </thead>
         <tbody>
           {events.map((event) => {
-            const status = STATUS_LABELS[event.status] ?? STATUS_LABELS.UPCOMING;
+            const status = event.isActive ? (
+              event.status === "UPCOMING" ? { label: "Próximo", className: "bg-green-100 text-green-800" } :
+              event.status === "ONGOING" ? { label: "Em Andamento", className: "bg-yellow-100 text-yellow-800" } :
+              { label: "Encerrado", className: "bg-gray-100 text-gray-800" }
+            ) : { label: "Inativo", className: "bg-red-100 text-red-800" };
             return (
               <tr key={event.id} className="border-t hover:bg-gray-50 transition">
                 <td className="px-4 py-3 font-medium text-gray-800">{event.title}</td>

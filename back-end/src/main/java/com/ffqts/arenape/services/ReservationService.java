@@ -56,6 +56,9 @@ public class ReservationService {
         for (int i = 0; i < form.quantity(); i++) {
             var userTicket = new UserTicket(user, ticketModel, event);
             userTicketRepository.save(userTicket);
+
+            ticketModel.setTicketsSold(ticketModel.getTicketsSold() + 1);
+            ticketModelRepository.save(ticketModel);
         }
 
     }

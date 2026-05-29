@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface TicketModelRepository extends JpaRepository<TicketModel, UUID> {
     List<TicketModel> findByEvent_Id(UUID eventId);
+    List<TicketModel> findByExpiredFalseAndEvent_Id(UUID eventId);
 }

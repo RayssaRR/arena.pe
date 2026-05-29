@@ -3,7 +3,7 @@
 import HomeCard from "../components/HomeCard";
 import RecentEventsCard from "../components/RecentEventsCard";
 import { useEffect, useState } from "react";
-import { getEvents, EventResponse } from "@/lib/api";
+import { getEvents, EventResponse, getEventsWithDeleted } from "@/lib/api";
 import { getUserNameFromToken } from "@/lib/jwt-utils";
 import { Calendar, Ticket, CircleDollarSign, Plus } from "lucide-react";
 import Link from "next/link";
@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   async function loadData() {
     try {
       const token = localStorage.getItem("authToken");
-      const data = await getEvents();
+      const data = await getEventsWithDeleted(token!);
       setEvents(data);
 
       if (token && data.length > 0) {
@@ -75,7 +75,7 @@ export default function AdminDashboard() {
       await axios.delete(`${BACKEND_URL}/events/${eventId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+      router.refresh();
     } catch (err) {
       console.error("Erro ao deletar evento:", err);
       alert("Erro ao deletar evento. Tente novamente.");

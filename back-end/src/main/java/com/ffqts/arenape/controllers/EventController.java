@@ -31,6 +31,13 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
+    @GetMapping("/all")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<List<EventResponseDTO>> getAllEventsWithDeleted() {
+        var events = eventService.getAllEventsWithDeleted();
+        return ResponseEntity.ok(events);
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("permitAll()")
     public ResponseEntity<EventResponseDTO> getEventById(@PathVariable String id) {
@@ -59,8 +66,7 @@ public class EventController {
     @PreAuthorize("hasAuthority('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEventById(@PathVariable String id, HttpServletRequest req) {
-        var email = GetEmailFromTokenRequest.get(req);
-        eventService.deleteEvent(id, email);
+        eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
     }
 
