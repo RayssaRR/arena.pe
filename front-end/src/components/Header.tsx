@@ -27,13 +27,10 @@ export function Header() {
 
     loadUser();
 
-    // Atualizar a cada 10 segundos para verificar se token expirou
     const interval = setInterval(loadUser, 10000);
-
     return () => clearInterval(interval);
   }, []);
 
-  // Fechar menu ao clicar fora
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -77,12 +74,10 @@ export function Header() {
     return (
       <header className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto grid grid-cols-3 items-center">
-          {/* Logo */}
           <Link href="/" className="font-bold text-lg text-gray-900 hover:opacity-80 transition">
             Arena.pe
           </Link>
 
-          {/* Nav — centralizado */}
           <nav className="flex items-center justify-center gap-6">
             <Link href="/event-discover" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
               Eventos
@@ -92,7 +87,6 @@ export function Header() {
             </a>
           </nav>
 
-          {/* Auth buttons */}
           <div className="flex items-center justify-end gap-3">
             <Link href="/auth?tab=register" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
               Cadastre-se
@@ -113,12 +107,10 @@ export function Header() {
   return (
     <header className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto grid grid-cols-3 items-center">
-        {/* Logo */}
         <Link href="/" className="font-bold text-lg text-gray-900 hover:opacity-80 transition">
           Arena.pe
         </Link>
 
-        {/* Nav — centralizado */}
         <nav className="flex items-center justify-center gap-6">
           <Link href="/event-discover" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
             Eventos
@@ -128,14 +120,12 @@ export function Header() {
           </a>
         </nav>
 
-        {/* User Menu */}
         <div className="flex items-center justify-end">
           <div className="relative" ref={menuRef}>
             <button
               onClick={() => setShowMenu(!showMenu)}
               className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition"
             >
-              {/* Avatar com iniciais */}
               <div className={`w-9 h-9 rounded-full ${roleBgColor} flex items-center justify-center font-semibold text-sm ${roleBadgeColor}`}>
                 {user.name
                   .split(' ')
@@ -144,13 +134,11 @@ export function Header() {
                   .join('')}
               </div>
 
-              {/* Nome e Role */}
               <div className="text-left hidden sm:block">
                 <p className="text-xs font-semibold text-gray-900">{user.name}</p>
                 <p className={`text-xs ${roleBadgeColor}`}>{roleLabel}</p>
               </div>
 
-              {/* Ícone de chevron */}
               <svg
                 className={`w-4 h-4 text-gray-600 transition-transform ${showMenu ? 'rotate-180' : ''}`}
                 fill="none"
@@ -166,10 +154,8 @@ export function Header() {
               </svg>
             </button>
 
-            {/* Menu Dropdown */}
             {showMenu && (
               <div className="absolute right-0 mt-2 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                {/* Informações do usuário */}
                 <div className="px-4 py-3 border-b border-gray-200">
                   <p className="text-sm font-semibold text-gray-900">{user.name}</p>
                   <p className="text-xs text-gray-600 truncate">{user.email}</p>
@@ -180,7 +166,6 @@ export function Header() {
                   </div>
                 </div>
 
-                {/* Links do menu */}
                 <Link
                   href={dashboardUrl}
                   className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
@@ -199,7 +184,16 @@ export function Header() {
                   </Link>
                 )}
 
-                {/* Logout */}
+                {isAdmin && (
+                  <Link
+                    href="/users"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                    onClick={() => setShowMenu(false)}
+                  >
+                    Gerenciar Usuários
+                  </Link>
+                )}
+
                 <div className="border-t border-gray-200 pt-2">
                   <button
                     onClick={handleLogout}

@@ -14,7 +14,7 @@ type UpcomingEvent = {
   title: string;
   description: string;
   eventDate: string;
-  imageUrl?: string;                          // ← adicionado
+  imageUrl?: string;
   category: { id: number; title: string } | null;
   ticketType: string;
   location: string;
@@ -38,8 +38,6 @@ function UpcomingEventCard({ event }: { event: UpcomingEvent }) {
 
   return (
     <Card className="mx-auto w-full pt-0 overflow-hidden">
-
-      {/* Header com imagem real de fundo */}
       <CardHeader className="relative h-36 p-0">
         {imageUrl ? (
           <img
@@ -48,9 +46,8 @@ function UpcomingEventCard({ event }: { event: UpcomingEvent }) {
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 bg-gray-300" /> // fallback se não tiver imagem
+          <div className="absolute inset-0 bg-gray-300" />
         )}
-        {/* Overlay escuro para o badge de categoria ficar legível */}
         <div className="absolute inset-0 bg-black/40" />
         <div className="relative z-10 p-5">
           <p className="bg-white p-1 rounded-md text-(--blue) font-bold w-fit px-4 text-sm">
@@ -67,7 +64,7 @@ function UpcomingEventCard({ event }: { event: UpcomingEvent }) {
 
       <CardFooter className="flex justify-between gap-3 bg-white p-5">
         <Button
-          onClick={() => router.push(`/event-details/${event.id}`)}
+          onClick={() => router.push(`/my-event?id=${event.id}`)}
           className="bg-(--blue) hover:bg-(--blue-hover) cursor-pointer"
         >
           Ver Detalhes
@@ -89,9 +86,6 @@ export default function UserDashboard() {
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log(upcomingEvents);
-  
-
   useEffect(() => {
     const name = getUserNameFromToken();
     if (name) setUserName(name);
@@ -100,13 +94,14 @@ export default function UserDashboard() {
       try {
         const token = localStorage.getItem("authToken");
         if (!token) return;
-        const res = await fetch(`${BACKEND_URL}/reservation/events/purchased?page=0&pageSize=4`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          `${BACKEND_URL}/reservation/events/purchased?page=0&pageSize=4`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
         if (res.ok) {
           const data = await res.json();
           setUpcomingEvents(data.content || []);
-        };
+        }
       } catch (err) {
         console.error("Erro ao carregar eventos:", err);
       } finally {
@@ -144,7 +139,7 @@ export default function UserDashboard() {
           <p className="text-sm text-muted-foreground">Nenhum evento próximo encontrado.</p>
         ) : (
           <div className="grid grid-cols-4 gap-8">
-            {upcomingEvents.slice(0, 3).map((event) => (
+            {upcomingEvents.slice(0, 4).map((event) => (
               <UpcomingEventCard key={event.id} event={event} />
             ))}
           </div>
