@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle, Download, Printer, MapPin, Tag, Users, Calendar } from "lucide-react"
 import { QRCodeSVG } from "qrcode.react"
 import { getTicketById, UserTicketResponse } from "@/lib/api"
-import { Header } from "@/components/Header"
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return ""
@@ -232,7 +233,7 @@ function TicketContent() {
   }
 
   const qrValue = ticket?.ticketId
-    ? `https://arena.pe/ticket/${ticket.ticketId}`
+    ? `${BACKEND_URL}/reservation/tickets/${ticket.ticketId}/consume`
     : "pending"
 
   if (isLoading) {
@@ -258,7 +259,6 @@ function TicketContent() {
 
   return (
     <div className="min-h-screen bg-[#F5F7F8]">
-      <Header />
 
       <main className="flex flex-col items-center p-8">
 

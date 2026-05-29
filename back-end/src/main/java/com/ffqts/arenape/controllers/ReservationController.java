@@ -6,6 +6,7 @@ import com.ffqts.arenape.controllers.dto.ticket.PagedUserTicketsDTO;
 import com.ffqts.arenape.controllers.dto.ticket.TicketCancellationResponseDTO;
 import com.ffqts.arenape.controllers.utils.GetEmailFromTokenRequest;
 import com.ffqts.arenape.models.ticket.TicketModel;
+import com.ffqts.arenape.models.ticket.TicketStatus;
 import com.ffqts.arenape.services.ReservationService;
 import com.ffqts.arenape.services.TicketCancellationService;
 import com.ffqts.arenape.services.UserTicketService;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -155,5 +157,13 @@ public class ReservationController {
         }
     }
 
-    
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @GetMapping("/tickets/{ticketId}/consume")
+    public ResponseEntity<?> consumeTicket(@PathVariable String ticketId) {
+        var userTicket = reservationService.consumeTicket(ticketId);
+        boolean isValid = userTicket.getStatus() == TicketStatus.RESGATADO;
+        return ResponseEntity.ok(isValid);
+    }
+
+
 }

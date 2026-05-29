@@ -2,12 +2,16 @@ package com.ffqts.arenape.services;
 
 import com.ffqts.arenape.controllers.dto.reservation.NewReservationForm;
 import com.ffqts.arenape.models.event.EventStatus;
+import com.ffqts.arenape.models.ticket.TicketStatus;
 import com.ffqts.arenape.models.ticket.UserTicket;
 import com.ffqts.arenape.repositories.EventRepository;
 import com.ffqts.arenape.repositories.TicketModelRepository;
 import com.ffqts.arenape.repositories.UserRepository;
 import com.ffqts.arenape.repositories.UserTicketRepository;
 import jakarta.transaction.Transactional;
+
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,7 +60,22 @@ public class ReservationService {
         for (int i = 0; i < form.quantity(); i++) {
             var userTicket = new UserTicket(user, ticketModel, event);
             userTicketRepository.save(userTicket);
+
+            ticketModel.setTicketsSold(ticketModel.getTicketsSold() + 1);
+            ticketModelRepository.save(ticketModel);
         }
 
+    }
+
+    public UserTicket consumeTicket(String ticketId) {
+        var userTicket = userTicketRepository.findById(UUID.fromString(ticketId))
+                .orElseThrow(() -> new IllegalArgumentException("Ticket não encontrado"));
+
+        if (userTicket.getStatus() != TicketStatus.VALIDO) {
+            throw new IllegalArgumentException("Ticket inválido ou já consumido");
+        }
+
+        userTicket.setStatus(TicketStatus.RESGATADO);
+        return userTicketRepository.save(userTicket);
     }
 }
