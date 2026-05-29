@@ -20,6 +20,17 @@ type SectorPrice = {
   capacity: string;
 };
 
+interface FieldErrors {
+  title?: string;
+  description?: string;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  categoryId?: string;
+  imageUrl?: string;
+  sectors?: string;
+}
+
 export default function UpdateEventForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,6 +43,7 @@ export default function UpdateEventForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedSectors, setSelectedSectors] = useState<SectorPrice[]>([]);
@@ -61,7 +73,6 @@ export default function UpdateEventForm() {
 
         setCategories(cats);
 
-        // Preencher formulário com dados do evento
         const dateObj = new Date(event.eventDate);
         const date = dateObj.toISOString().split("T")[0];
         const startTime = dateObj.toTimeString().slice(0, 5);
@@ -76,7 +87,6 @@ export default function UpdateEventForm() {
           imageUrl: event.imageUrl ?? "",
         });
 
-        // Preview da imagem existente
         const resolvedUrl = resolvePublicAssetUrl(event.imageUrl);
         if (resolvedUrl) setImagePreview(resolvedUrl);
 
@@ -101,11 +111,16 @@ export default function UpdateEventForm() {
     loadData();
   }, [eventId]);
 
+  const clearFieldError = (field: keyof FieldErrors) => {
+    if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+    clearFieldError(id as keyof FieldErrors);
   };
 
   const toggleSector = (location: string, maxCapacity: number) => {
@@ -114,6 +129,7 @@ export default function UpdateEventForm() {
       if (exists) return prev.filter((s) => s.location !== location);
       return [...prev, { location, price: "", capacity: String(maxCapacity) }];
     });
+    clearFieldError("sectors");
   };
 
   const updateSector = (location: string, field: "price" | "capacity", value: string) => {
@@ -135,16 +151,16 @@ export default function UpdateEventForm() {
     if (!file) return;
 
     if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
-      setError("Apenas PNG e JPG são permitidos");
+      setFieldErrors((prev) => ({ ...prev, imageUrl: "Apenas PNG e JPG são permitidos" }));
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      setError("Arquivo não pode exceder 10MB");
+      setFieldErrors((prev) => ({ ...prev, imageUrl: "Arquivo não pode exceder 10MB" }));
       return;
     }
 
     setUploadingImage(true);
-    setError(null);
+    clearFieldError("imageUrl");
 
     try {
       const token = localStorage.getItem("authToken");
@@ -152,47 +168,63 @@ export default function UpdateEventForm() {
       const imageUrl = await uploadImageToPublicAssets(file, token);
       setFormData((prev) => ({ ...prev, imageUrl }));
       const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.onload = (ev) => setImagePreview(ev.target?.result as string);
       reader.readAsDataURL(file);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao fazer upload da imagem");
+      setFieldErrors((prev) => ({
+        ...prev,
+        imageUrl: err instanceof Error ? err.message : "Erro ao fazer upload da imagem",
+      }));
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  const validate = (): FieldErrors => {
+    const errors: FieldErrors = {};
+    if (!formData.title.trim()) errors.title = "Nome do evento é obrigatório";
+    if (!formData.description.trim()) errors.description = "Descrição é obrigatória";
+    if (!formData.date) errors.date = "Data é obrigatória";
+    if (!formData.startTime) errors.startTime = "Hora de início é obrigatória";
+    if (!formData.categoryId) errors.categoryId = "Categoria é obrigatória";
+    if (!formData.imageUrl) errors.imageUrl = "Imagem é obrigatória";
+    if (selectedSectors.length === 0) {
+      errors.sectors = "Selecione pelo menos um setor";
+    } else {
+      for (const s of selectedSectors) {
+        if (!s.price || parseFloat(s.price) <= 0) {
+          errors.sectors = `Defina o preço do setor ${s.location}`;
+          break;
+        }
+        const sectorInfo = TICKET_LOCATIONS.find((l) => l.value === s.location);
+        const cap = parseInt(s.capacity);
+        if (!cap || cap <= 0) { errors.sectors = `Defina a capacidade do setor ${s.location}`; break; }
+        if (sectorInfo && cap > sectorInfo.capacity) {
+          errors.sectors = `Capacidade do setor ${sectorInfo.label} não pode exceder ${sectorInfo.capacity.toLocaleString("pt-BR")} lugares`;
+          break;
+        }
+      }
+      if (!errors.sectors && totalSelectedCapacity > TOTAL_CAPACITY) {
+        errors.sectors = `Capacidade total (${totalSelectedCapacity.toLocaleString("pt-BR")}) excede o limite da arena (${TOTAL_CAPACITY.toLocaleString("pt-BR")})`;
+      }
+    }
+    return errors;
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
-    setIsSubmitting(true);
 
+    const errors = validate();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       if (!eventId) throw new Error("ID do evento não encontrado");
-      if (!formData.title.trim()) throw new Error("Nome do evento é obrigatório");
-      if (!formData.description.trim()) throw new Error("Descrição é obrigatória");
-      if (!formData.date) throw new Error("Data é obrigatória");
-      if (!formData.startTime) throw new Error("Hora de início é obrigatória");
-      if (!formData.categoryId) throw new Error("Categoria é obrigatória");
-      if (!formData.imageUrl) throw new Error("Imagem é obrigatória");
-      if (selectedSectors.length === 0) throw new Error("Selecione pelo menos um setor");
-
-      for (const s of selectedSectors) {
-        if (!s.price || parseFloat(s.price) <= 0)
-          throw new Error(`Defina o preço do setor ${s.location}`);
-        const sectorInfo = TICKET_LOCATIONS.find((l) => l.value === s.location);
-        const cap = parseInt(s.capacity);
-        if (!cap || cap <= 0) throw new Error(`Defina a capacidade do setor ${s.location}`);
-        if (sectorInfo && cap > sectorInfo.capacity)
-          throw new Error(
-            `Capacidade do setor ${sectorInfo.label} não pode exceder ${sectorInfo.capacity.toLocaleString("pt-BR")} lugares`
-          );
-      }
-
-      if (totalSelectedCapacity > TOTAL_CAPACITY)
-        throw new Error(
-          `Capacidade total (${totalSelectedCapacity.toLocaleString("pt-BR")}) excede o limite da arena (${TOTAL_CAPACITY.toLocaleString("pt-BR")})`
-        );
 
       const eventDateTime = `${formData.date}T${formData.startTime}:00`;
       const token = localStorage.getItem("authToken");
@@ -263,6 +295,7 @@ export default function UpdateEventForm() {
       }
 
       setSuccessMessage("Evento atualizado com sucesso!");
+      setFieldErrors({});
       setTimeout(() => router.push("/dashboard-admin"), 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao atualizar evento");
@@ -270,6 +303,12 @@ export default function UpdateEventForm() {
       setIsSubmitting(false);
     }
   };
+
+  const inputErr = (field: keyof FieldErrors) =>
+    fieldErrors[field] ? "border-red-400 focus-visible:ring-red-400" : "";
+
+  const Err = ({ field }: { field: keyof FieldErrors }) =>
+    fieldErrors[field] ? <p className="text-sm text-red-500 mt-1">{fieldErrors[field]}</p> : null;
 
   return (
     <main className="p-8 min-h-screen">
@@ -301,7 +340,8 @@ export default function UpdateEventForm() {
             <div className="flex flex-col md:flex-row gap-5">
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="title">Nome do evento</Label>
-                <Input id="title" placeholder="Ex: Campeonato de Verão 2026" value={formData.title} onChange={handleChange} disabled={isSubmitting} />
+                <Input id="title" placeholder="Ex: Campeonato de Verão 2026" value={formData.title} onChange={handleChange} disabled={isSubmitting} className={inputErr("title")} />
+                <Err field="title" />
               </div>
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="categoryId">Categoria</Label>
@@ -310,18 +350,20 @@ export default function UpdateEventForm() {
                   value={formData.categoryId}
                   onChange={handleChange}
                   disabled={isLoadingCategories || isSubmitting}
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${fieldErrors.categoryId ? "border-red-400" : "border-gray-300"}`}
                 >
                   <option value="">Selecione uma categoria</option>
                   {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>{cat.title}</option>
                   ))}
                 </select>
+                <Err field="categoryId" />
               </div>
             </div>
             <div className="flex flex-col space-y-1">
               <Label htmlFor="description">Descrição</Label>
-              <Textarea id="description" placeholder="Descreva o evento..." className="min-h-30 resize-none" value={formData.description} onChange={handleChange} disabled={isSubmitting} />
+              <Textarea id="description" placeholder="Descreva o evento..." className={`min-h-30 resize-none ${inputErr("description")}`} value={formData.description} onChange={handleChange} disabled={isSubmitting} />
+              <Err field="description" />
             </div>
           </section>
 
@@ -334,15 +376,18 @@ export default function UpdateEventForm() {
             <div className="flex flex-col md:flex-row gap-5">
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="date">Data</Label>
-                <Input id="date" type="date" value={formData.date} onChange={handleChange} disabled={isSubmitting} />
+                <Input id="date" type="date" value={formData.date} onChange={handleChange} disabled={isSubmitting} className={inputErr("date")} />
+                <Err field="date" />
               </div>
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="startTime">Hora de início</Label>
-                <Input id="startTime" type="time" value={formData.startTime} onChange={handleChange} disabled={isSubmitting} />
+                <Input id="startTime" type="time" value={formData.startTime} onChange={handleChange} disabled={isSubmitting} className={inputErr("startTime")} />
+                <Err field="startTime" />
               </div>
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="endTime">Hora de término</Label>
-                <Input id="endTime" type="time" value={formData.endTime} onChange={handleChange} disabled={isSubmitting} />
+                <Input id="endTime" type="time" value={formData.endTime} onChange={handleChange} disabled={isSubmitting} className={inputErr("endTime")} />
+                <Err field="endTime" />
               </div>
             </div>
           </section>
@@ -364,6 +409,10 @@ export default function UpdateEventForm() {
             <p className="text-sm text-gray-500">
               Selecione os setores disponíveis e defina o preço e a capacidade de cada um. Capacidade máxima da arena: <strong>45.500</strong> pessoas.
             </p>
+
+            {fieldErrors.sectors && (
+              <p className="text-sm text-red-500">{fieldErrors.sectors}</p>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               {TICKET_LOCATIONS.map(({ value, label, capacity }) => {
@@ -479,7 +528,7 @@ export default function UpdateEventForm() {
             ) : (
               <label
                 htmlFor="fileUpload"
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-sm text-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition"
+                className={`border-2 border-dashed rounded-lg p-6 text-sm text-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition ${fieldErrors.imageUrl ? "border-red-400" : "border-gray-300"}`}
               >
                 <p className="text-blue-600 font-medium">Clique para enviar</p>
                 <p>ou arraste e solte</p>
@@ -493,6 +542,9 @@ export default function UpdateEventForm() {
                   accept="image/png,image/jpeg,image/jpg"
                 />
               </label>
+            )}
+            {fieldErrors.imageUrl && (
+              <p className="text-sm text-red-500">{fieldErrors.imageUrl}</p>
             )}
             {uploadingImage && <p className="text-sm text-blue-600">Enviando imagem...</p>}
           </section>
