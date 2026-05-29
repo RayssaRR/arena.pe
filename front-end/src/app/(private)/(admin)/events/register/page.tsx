@@ -11,11 +11,27 @@ import { createEvent, getCategories, uploadImageToPublicAssets, Category } from 
 import { useRouter } from "next/navigation";
 import { TICKET_LOCATIONS, TOTAL_CAPACITY } from "@/app/(private)/(admin)/components/TicketLocations";
 
-type SectorPrice = {
-  location: string;
-  price: string;
-  capacity: string;
-};
+type SectorPrice = { location: string; price: string; capacity: string };
+
+interface FieldErrors {
+  title?: string;
+  description?: string;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  categoryId?: string;
+  imageUrl?: string;
+  sectors?: string;
+}
+
+interface Touched {
+  title?: boolean;
+  description?: boolean;
+  date?: boolean;
+  startTime?: boolean;
+  endTime?: boolean;
+  categoryId?: boolean;
+}
 
 export default function EventForm() {
   const router = useRouter();
@@ -25,18 +41,14 @@ export default function EventForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [touched, setTouched] = useState<Touched>({});
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedSectors, setSelectedSectors] = useState<SectorPrice[]>([]);
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    date: "",
-    startTime: "",
-    endTime: "",
-    categoryId: "",
-    imageUrl: "",
+    title: "", description: "", date: "", startTime: "", endTime: "", categoryId: "", imageUrl: "",
   });
 
   useEffect(() => {
@@ -57,11 +69,32 @@ export default function EventForm() {
     loadCategories();
   }, []);
 
+  const validateField = (id: string, value: string): string | undefined => {
+    if (id === "title" && !value.trim()) return "Nome do evento é obrigatório";
+    if (id === "description" && !value.trim()) return "Descrição é obrigatória";
+    if (id === "date" && !value) return "Data é obrigatória";
+    if (id === "startTime" && !value) return "Hora de início é obrigatória";
+    if (id === "endTime" && !value) return "Hora de término é obrigatória";
+    if (id === "categoryId" && !value) return "Categoria é obrigatória";
+    return undefined;
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
+    if (touched[id as keyof Touched]) {
+      setFieldErrors((prev) => ({ ...prev, [id]: validateField(id, value) }));
+    }
+  };
+
+  const handleBlur = (
+    e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { id, value } = e.target;
+    setTouched((prev) => ({ ...prev, [id]: true }));
+    setFieldErrors((prev) => ({ ...prev, [id]: validateField(id, value) }));
   };
 
   const toggleSector = (location: string, maxCapacity: number) => {
@@ -70,6 +103,7 @@ export default function EventForm() {
       if (exists) return prev.filter((s) => s.location !== location);
       return [...prev, { location, price: "", capacity: String(maxCapacity) }];
     });
+    setFieldErrors((prev) => ({ ...prev, sectors: undefined }));
   };
 
   const updateSector = (location: string, field: "price" | "capacity", value: string) => {
@@ -82,98 +116,101 @@ export default function EventForm() {
     selectedSectors.some((s) => s.location === location);
 
   const totalSelectedCapacity = selectedSectors.reduce(
-    (acc, s) => acc + (parseInt(s.capacity) || 0),
-    0
+    (acc, s) => acc + (parseInt(s.capacity) || 0), 0
   );
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
-      setError("Apenas PNG e JPG são permitidos");
+      setFieldErrors((prev) => ({ ...prev, imageUrl: "Apenas PNG e JPG são permitidos" }));
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      setError("Arquivo não pode exceder 10MB");
+      setFieldErrors((prev) => ({ ...prev, imageUrl: "Arquivo não pode exceder 10MB" }));
       return;
     }
-
     setUploadingImage(true);
-    setError(null);
-
+    setFieldErrors((prev) => ({ ...prev, imageUrl: undefined }));
     try {
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("Token não encontrado");
       const imageUrl = await uploadImageToPublicAssets(file, token);
       setFormData((prev) => ({ ...prev, imageUrl }));
       const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target?.result as string);
+      reader.onload = (ev) => setImagePreview(ev.target?.result as string);
       reader.readAsDataURL(file);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao fazer upload da imagem");
+      setFieldErrors((prev) => ({
+        ...prev,
+        imageUrl: err instanceof Error ? err.message : "Erro ao fazer upload da imagem",
+      }));
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  const validate = (): FieldErrors => {
+    const errors: FieldErrors = {};
+    if (!formData.title.trim()) errors.title = "Nome do evento é obrigatório";
+    if (!formData.description.trim()) errors.description = "Descrição é obrigatória";
+    if (!formData.date) errors.date = "Data é obrigatória";
+    if (!formData.startTime) errors.startTime = "Hora de início é obrigatória";
+    if (!formData.endTime) errors.endTime = "Hora de término é obrigatória";
+    if (!formData.categoryId) errors.categoryId = "Categoria é obrigatória";
+    if (!formData.imageUrl) errors.imageUrl = "Imagem é obrigatória";
+    if (selectedSectors.length === 0) {
+      errors.sectors = "Selecione pelo menos um setor";
+    } else {
+      for (const s of selectedSectors) {
+        if (!s.price || parseFloat(s.price) <= 0) { errors.sectors = `Defina o preço do setor ${s.location}`; break; }
+        const sectorInfo = TICKET_LOCATIONS.find((l) => l.value === s.location);
+        const cap = parseInt(s.capacity);
+        if (!cap || cap <= 0) { errors.sectors = `Defina a capacidade do setor ${s.location}`; break; }
+        if (sectorInfo && cap > sectorInfo.capacity) {
+          errors.sectors = `Capacidade do setor ${sectorInfo.label} não pode exceder ${sectorInfo.capacity.toLocaleString("pt-BR")} lugares`;
+          break;
+        }
+      }
+      if (!errors.sectors && totalSelectedCapacity > TOTAL_CAPACITY) {
+        errors.sectors = `Capacidade total (${totalSelectedCapacity.toLocaleString("pt-BR")}) excede o limite da arena (${TOTAL_CAPACITY.toLocaleString("pt-BR")})`;
+      }
+    }
+    return errors;
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+
+    setTouched({ title: true, description: true, date: true, startTime: true, endTime: true, categoryId: true });
+    const errors = validate();
+    const hasErrors = Object.values(errors).some(Boolean);
+    setFieldErrors(errors);
+    if (hasErrors) return;
+
     setIsSubmitting(true);
-
     try {
-      if (!formData.title.trim()) throw new Error("Nome do evento é obrigatório");
-      if (!formData.description.trim()) throw new Error("Descrição é obrigatória");
-      if (!formData.date) throw new Error("Data é obrigatória");
-      if (!formData.startTime) throw new Error("Hora de início é obrigatória");
-      if (!formData.endTime) throw new Error("Hora de término é obrigatória");
-      if (!formData.categoryId) throw new Error("Categoria é obrigatória");
-      if (!formData.imageUrl) throw new Error("Imagem é obrigatória");
-      if (selectedSectors.length === 0) throw new Error("Selecione pelo menos um setor");
-
-      for (const s of selectedSectors) {
-        if (!s.price || parseFloat(s.price) <= 0)
-          throw new Error(`Defina o preço do setor ${s.location}`);
-        const sectorInfo = TICKET_LOCATIONS.find((l) => l.value === s.location);
-        const cap = parseInt(s.capacity);
-        if (!cap || cap <= 0) throw new Error(`Defina a capacidade do setor ${s.location}`);
-        if (sectorInfo && cap > sectorInfo.capacity)
-          throw new Error(
-            `Capacidade do setor ${sectorInfo.label} não pode exceder ${sectorInfo.capacity.toLocaleString("pt-BR")} lugares`
-          );
-      }
-
-      if (totalSelectedCapacity > TOTAL_CAPACITY)
-        throw new Error(
-          `Capacidade total (${totalSelectedCapacity.toLocaleString("pt-BR")}) excede o limite da arena (${TOTAL_CAPACITY.toLocaleString("pt-BR")})`
-        );
-
       const eventDateTime = `${formData.date}T${formData.startTime}:00`;
       const token = localStorage.getItem("authToken");
       if (!token) throw new Error("Token não encontrado. Faça login novamente.");
-
       await createEvent(
         {
-          title: formData.title,
-          description: formData.description,
-          eventDate: eventDateTime,
-          imageUrl: formData.imageUrl,
-          categoryId: parseInt(formData.categoryId),
+          title: formData.title, description: formData.description, eventDate: eventDateTime,
+          imageUrl: formData.imageUrl, categoryId: parseInt(formData.categoryId),
           tickets: selectedSectors.map((s) => ({
-            location: s.location,
-            price: parseFloat(s.price),
-            ticketsAvailable: parseInt(s.capacity),
+            location: s.location, price: parseFloat(s.price), ticketsAvailable: parseInt(s.capacity),
           })),
         },
         token
       );
-
       setSuccessMessage("Evento criado com sucesso!");
       setFormData({ title: "", description: "", date: "", startTime: "", endTime: "", categoryId: "", imageUrl: "" });
       setImagePreview(null);
       setSelectedSectors([]);
+      setFieldErrors({});
+      setTouched({});
       setTimeout(() => router.push("/dashboard-admin"), 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar evento");
@@ -181,6 +218,11 @@ export default function EventForm() {
       setIsSubmitting(false);
     }
   };
+
+  const inputErr = (field: keyof FieldErrors) =>
+    fieldErrors[field] ? "border-red-400 focus-visible:ring-red-400" : "";
+  const Err = ({ field }: { field: keyof FieldErrors }) =>
+    fieldErrors[field] ? <p className="text-sm text-red-500 mt-1">{fieldErrors[field]}</p> : null;
 
   return (
     <main className="p-8 min-h-screen">
@@ -190,7 +232,6 @@ export default function EventForm() {
         </div>
       ) : (
         <form className="space-y-8" onSubmit={handleSubmit}>
-
           <header className="space-y-1">
             <h1 className="title-h1">Criar novo evento</h1>
             <p className="subtitle">Configure os detalhes do evento, programação e preços.</p>
@@ -212,27 +253,26 @@ export default function EventForm() {
             <div className="flex flex-col md:flex-row gap-5">
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="title">Nome do evento</Label>
-                <Input id="title" placeholder="Ex: Campeonato de Verão 2026" value={formData.title} onChange={handleChange} disabled={isSubmitting} />
+                <Input id="title" placeholder="Ex: Campeonato de Verão 2026" value={formData.title} onChange={handleChange} onBlur={handleBlur} disabled={isSubmitting} className={inputErr("title")} />
+                <Err field="title" />
               </div>
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="categoryId">Categoria</Label>
                 <select
-                  id="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleChange}
+                  id="categoryId" value={formData.categoryId} onChange={handleChange} onBlur={handleBlur}
                   disabled={isLoadingCategories || isSubmitting}
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${fieldErrors.categoryId ? "border-red-400" : "border-gray-300"}`}
                 >
                   <option value="">Selecione uma categoria</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>{cat.title}</option>
-                  ))}
+                  {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.title}</option>)}
                 </select>
+                <Err field="categoryId" />
               </div>
             </div>
             <div className="flex flex-col space-y-1">
               <Label htmlFor="description">Descrição</Label>
-              <Textarea id="description" placeholder="Descreva o evento..." className="min-h-30 resize-none" value={formData.description} onChange={handleChange} disabled={isSubmitting} />
+              <Textarea id="description" placeholder="Descreva o evento..." className={`min-h-30 resize-none ${inputErr("description")}`} value={formData.description} onChange={handleChange} onBlur={handleBlur} disabled={isSubmitting} />
+              <Err field="description" />
             </div>
           </section>
 
@@ -245,15 +285,18 @@ export default function EventForm() {
             <div className="flex flex-col md:flex-row gap-5">
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="date">Data</Label>
-                <Input id="date" type="date" value={formData.date} onChange={handleChange} disabled={isSubmitting} />
+                <Input id="date" type="date" value={formData.date} onChange={handleChange} onBlur={handleBlur} disabled={isSubmitting} className={inputErr("date")} />
+                <Err field="date" />
               </div>
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="startTime">Hora de início</Label>
-                <Input id="startTime" type="time" value={formData.startTime} onChange={handleChange} disabled={isSubmitting} />
+                <Input id="startTime" type="time" value={formData.startTime} onChange={handleChange} onBlur={handleBlur} disabled={isSubmitting} className={inputErr("startTime")} />
+                <Err field="startTime" />
               </div>
               <div className="flex flex-col space-y-1 flex-1">
                 <Label htmlFor="endTime">Hora de término</Label>
-                <Input id="endTime" type="time" value={formData.endTime} onChange={handleChange} disabled={isSubmitting} />
+                <Input id="endTime" type="time" value={formData.endTime} onChange={handleChange} onBlur={handleBlur} disabled={isSubmitting} className={inputErr("endTime")} />
+                <Err field="endTime" />
               </div>
             </div>
           </section>
@@ -275,6 +318,7 @@ export default function EventForm() {
             <p className="text-sm text-gray-500">
               Selecione os setores disponíveis e defina o preço e a capacidade de cada um. Capacidade máxima da arena: <strong>45.500</strong> pessoas.
             </p>
+            {fieldErrors.sectors && <p className="text-sm text-red-500">{fieldErrors.sectors}</p>}
 
             <div className="grid grid-cols-2 gap-4">
               {TICKET_LOCATIONS.map(({ value, label, capacity }) => {
@@ -282,63 +326,26 @@ export default function EventForm() {
                 const sector = selectedSectors.find((s) => s.location === value);
                 const capValue = parseInt(sector?.capacity ?? "0") || 0;
                 const capExceeded = capValue > capacity;
-
                 return (
-                  <div
-                    key={value}
-                    className={`border rounded-xl p-4 transition-all ${selected ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}
-                  >
+                  <div key={value} className={`border rounded-xl p-4 transition-all ${selected ? "border-blue-500 bg-blue-50" : "border-gray-200"}`}>
                     <label className="flex items-center justify-between cursor-pointer">
                       <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={selected}
-                          onChange={() => toggleSector(value, capacity)}
-                          disabled={isSubmitting}
-                          className="w-4 h-4 accent-blue-600 cursor-pointer"
-                        />
-                        <span className={`text-sm font-medium ${selected ? "text-blue-700" : "text-gray-700"}`}>
-                          {label}
-                        </span>
+                        <input type="checkbox" checked={selected} onChange={() => toggleSector(value, capacity)} disabled={isSubmitting} className="w-4 h-4 accent-blue-600 cursor-pointer" />
+                        <span className={`text-sm font-medium ${selected ? "text-blue-700" : "text-gray-700"}`}>{label}</span>
                       </div>
-                      <span className="text-xs text-gray-400">
-                        máx. {capacity.toLocaleString("pt-BR")}
-                      </span>
+                      <span className="text-xs text-gray-400">máx. {capacity.toLocaleString("pt-BR")}</span>
                     </label>
-
                     {selected && (
                       <div className="mt-3 space-y-2">
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-gray-500 w-16">Preço (R$)</span>
-                          <Input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            placeholder="0,00"
-                            value={sector?.price ?? ""}
-                            onChange={(e) => updateSector(value, "price", e.target.value)}
-                            disabled={isSubmitting}
-                            className="h-8 text-sm"
-                          />
+                          <Input type="number" min="0" step="0.01" placeholder="0,00" value={sector?.price ?? ""} onChange={(e) => updateSector(value, "price", e.target.value)} disabled={isSubmitting} className="h-8 text-sm" />
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs text-gray-500 w-16">Lugares</span>
-                          <Input
-                            type="number"
-                            min="1"
-                            max={capacity}
-                            placeholder={String(capacity)}
-                            value={sector?.capacity ?? ""}
-                            onChange={(e) => updateSector(value, "capacity", e.target.value)}
-                            disabled={isSubmitting}
-                            className={`h-8 text-sm ${capExceeded ? "border-red-400" : ""}`}
-                          />
+                          <Input type="number" min="1" max={capacity} placeholder={String(capacity)} value={sector?.capacity ?? ""} onChange={(e) => updateSector(value, "capacity", e.target.value)} disabled={isSubmitting} className={`h-8 text-sm ${capExceeded ? "border-red-400" : ""}`} />
                         </div>
-                        {capExceeded && (
-                          <p className="text-xs text-red-500">
-                            Máximo: {capacity.toLocaleString("pt-BR")} lugares
-                          </p>
-                        )}
+                        {capExceeded && <p className="text-xs text-red-500">Máximo: {capacity.toLocaleString("pt-BR")} lugares</p>}
                       </div>
                     )}
                   </div>
@@ -356,9 +363,7 @@ export default function EventForm() {
                       <span>{info?.label}</span>
                       <div className="flex gap-6">
                         <span>{s.capacity ? `${parseInt(s.capacity).toLocaleString("pt-BR")} lugares` : "—"}</span>
-                        <span className="font-medium w-24 text-right">
-                          {s.price ? `R$ ${parseFloat(s.price).toFixed(2).replace(".", ",")}` : "—"}
-                        </span>
+                        <span className="font-medium w-24 text-right">{s.price ? `R$ ${parseFloat(s.price).toFixed(2).replace(".", ",")}` : "—"}</span>
                       </div>
                     </div>
                   );
@@ -380,51 +385,29 @@ export default function EventForm() {
             {imagePreview ? (
               <div className="relative w-full h-40 rounded-lg overflow-hidden border-2 border-gray-300">
                 <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => { setImagePreview(null); setFormData((prev) => ({ ...prev, imageUrl: "" })); }}
-                  className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
-                >
-                  Remover
-                </button>
+                <button type="button" onClick={() => { setImagePreview(null); setFormData((prev) => ({ ...prev, imageUrl: "" })); }} className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">Remover</button>
               </div>
             ) : (
-              <label
-                htmlFor="fileUpload"
-                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-sm text-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition"
-              >
+              <label htmlFor="fileUpload" className={`border-2 border-dashed rounded-lg p-6 text-sm text-gray-500 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition ${fieldErrors.imageUrl ? "border-red-400" : "border-gray-300"}`}>
                 <p className="text-blue-600 font-medium">Clique para enviar</p>
                 <p>ou arraste e solte</p>
                 <p className="text-xs mt-1">PNG, JPG até 10MB</p>
-                <input
-                  id="fileUpload"
-                  type="file"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                  disabled={uploadingImage || isSubmitting}
-                  accept="image/png,image/jpeg,image/jpg"
-                />
+                <input id="fileUpload" type="file" className="hidden" onChange={handleImageUpload} disabled={uploadingImage || isSubmitting} accept="image/png,image/jpeg,image/jpg" />
               </label>
             )}
+            {fieldErrors.imageUrl && <p className="text-sm text-red-500">{fieldErrors.imageUrl}</p>}
             {uploadingImage && <p className="text-sm text-blue-600">Enviando imagem...</p>}
           </section>
 
           {/* Actions */}
           <footer className="flex justify-end gap-3">
             <Link href="/dashboard-admin">
-              <Button variant="secondary" className="px-8 py-4 cursor-pointer" type="button" disabled={isSubmitting}>
-                Cancelar
-              </Button>
+              <Button variant="secondary" className="px-8 py-4 cursor-pointer" type="button" disabled={isSubmitting}>Cancelar</Button>
             </Link>
-            <Button
-              className="bg-(--blue) px-10 py-5 cursor-pointer"
-              type="submit"
-              disabled={isSubmitting || isLoadingCategories}
-            >
+            <Button className="bg-(--blue) px-10 py-5 cursor-pointer" type="submit" disabled={isSubmitting || isLoadingCategories}>
               {isSubmitting ? "Salvando..." : "Salvar evento"}
             </Button>
           </footer>
-
         </form>
       )}
     </main>
