@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -156,6 +157,7 @@ public class ReservationController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/tickets/{ticketId}/consume")
     public ResponseEntity<?> consumeTicket(@PathVariable String ticketId) {
         var userTicket = reservationService.consumeTicket(ticketId);
