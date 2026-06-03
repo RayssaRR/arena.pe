@@ -3,7 +3,7 @@ package com.ffqts.arenape.presentation.controllers.event;
 import com.ffqts.arenape.domain.models.event.Event;
 import com.ffqts.arenape.domain.services.event.ICreateEvent;
 import com.ffqts.arenape.presentation.dto.event.NewEventForm;
-import com.ffqts.arenape.utils.GetEmailFromTokenRequest;
+import com.ffqts.arenape.presentation.utils.GetEmailFromTokenRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

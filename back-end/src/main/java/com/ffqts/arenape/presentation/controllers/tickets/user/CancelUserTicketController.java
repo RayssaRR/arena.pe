@@ -2,7 +2,7 @@ package com.ffqts.arenape.presentation.controllers.tickets.user;
 
 import com.ffqts.arenape.domain.services.tickets.user.ICancelUserTicketService;
 import com.ffqts.arenape.presentation.dto.ticket.TicketCancellationResponseDTO;
-import com.ffqts.arenape.utils.GetEmailFromTokenRequest;
+import com.ffqts.arenape.presentation.utils.GetEmailFromTokenRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

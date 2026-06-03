@@ -1,4 +1,4 @@
-package com.ffqts.arenape.utils;
+package com.ffqts.arenape.presentation.utils;
 
 import com.ffqts.arenape.domain.models.event.Event;
 import com.ffqts.arenape.domain.models.ticket.TicketModel;

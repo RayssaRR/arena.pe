@@ -1,4 +1,4 @@
-package com.ffqts.arenape.utils;
+package com.ffqts.arenape.presentation.utils;
 
 import com.ffqts.arenape.infra.security.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;

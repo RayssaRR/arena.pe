@@ -3,7 +3,7 @@ package com.ffqts.arenape.presentation.controllers.tickets.user;
 import com.ffqts.arenape.domain.models.ticket.TicketModel;
 import com.ffqts.arenape.domain.services.tickets.user.IAssignUserTicketsService;
 import com.ffqts.arenape.presentation.dto.reservation.NewReservationForm;
-import com.ffqts.arenape.utils.GetEmailFromTokenRequest;
+import com.ffqts.arenape.presentation.utils.GetEmailFromTokenRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

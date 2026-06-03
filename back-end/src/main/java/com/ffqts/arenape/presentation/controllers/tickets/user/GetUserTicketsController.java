@@ -4,7 +4,7 @@ import com.ffqts.arenape.domain.services.tickets.user.IGetUserTicketsService;
 import com.ffqts.arenape.presentation.dto.ticket.ConsumeTicketResponseDTO;
 import com.ffqts.arenape.presentation.dto.ticket.PagedUserTicketsDTO;
 import com.ffqts.arenape.presentation.dto.ticket.TicketCancellationResponseDTO;
-import com.ffqts.arenape.utils.GetEmailFromTokenRequest;
+import com.ffqts.arenape.presentation.utils.GetEmailFromTokenRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
