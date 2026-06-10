@@ -82,7 +82,7 @@ function TicketContent() {
   }, [ticketId])
 
   const qrValue = ticket?.ticketId
-    ? `${BACKEND_URL}/reservation/tickets/${ticket.ticketId}/consume`
+    ? `${BACKEND_URL}/tickets/${ticket.ticketId}/consume`
     : "pending"
 
   if (isLoading) {

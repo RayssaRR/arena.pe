@@ -52,7 +52,7 @@ function MyTicketsContent() {
         const token = localStorage.getItem("authToken");
         if (!token) return;
 
-        const res = await fetch(`${BACKEND_URL}/reservation`, {
+        const res = await fetch(`${BACKEND_URL}/ticket`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

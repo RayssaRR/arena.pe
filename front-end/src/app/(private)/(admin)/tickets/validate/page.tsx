@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CheckCircle, XCircle, Ticket, Loader2, ShieldCheck } from "lucide-react";
-import { getJson, getJsonWithAuth } from "@/lib/api";
+import { getJson, getJsonWithAuth, postJsonWithAuth } from "@/lib/api";
 
 type TicketStatus = "idle" | "loading" | "found" | "not-found" | "validating" | "success" | "error";
 
@@ -25,15 +25,13 @@ export default function ValidateTicketPage() {
   
 
   async function getTicket(token?: string): Promise<TicketData> {
-    const url = `${BACKEND_URL}/reservation/admin/${ticketId}`;
+    const url = `${BACKEND_URL}/ticket/admin/${ticketId}`;
     return token ? getJsonWithAuth<TicketData>(url, token) : getJson<TicketData>(url);
   }
 
   async function consumeTicket(token?: string): Promise<TicketData> {
-    const url = `${BACKEND_URL}/reservation/tickets/${ticketId}/consume`;
-    console.log(url);
-    
-    return getJsonWithAuth<TicketData>(url, token!);
+    const url = `${BACKEND_URL}/tickets/${ticketId}/consume`;
+    return postJsonWithAuth<TicketData>(url, {}, token!);
   }
 
   const handleSearch = async () => {

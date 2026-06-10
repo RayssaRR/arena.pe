@@ -259,17 +259,17 @@ export async function getUserTickets(
     sortDirection: "desc",
   });
   if (filterByValidity !== undefined) params.append("filterByValidity", String(filterByValidity));
-  return getJsonWithAuth<PagedUserTickets>(`${BACKEND_BASE_URL}/reservation?${params}`, token);
+  return getJsonWithAuth<PagedUserTickets>(`${BACKEND_BASE_URL}/ticket?${params}`, token);
 }
 
 export async function cancelTicket(ticketId: string, token: string): Promise<void> {
-  await axios.delete(`${BACKEND_BASE_URL}/reservation/${ticketId}`, {
+  await axios.delete(`${BACKEND_BASE_URL}/ticket/${ticketId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
 
 export async function getTicketById(ticketId: string, token: string): Promise<UserTicketResponse> {
-  return getJsonWithAuth<UserTicketResponse>(`${BACKEND_BASE_URL}/reservation/${ticketId}`, token);
+  return getJsonWithAuth<UserTicketResponse>(`${BACKEND_BASE_URL}/ticket/${ticketId}`, token);
 }
 
 export interface CreateReservationRequest {
@@ -281,5 +281,5 @@ export async function createReservation(
   payload: CreateReservationRequest,
   token: string,
 ): Promise<void> {
-  await postJsonWithAuth<void>(`${BACKEND_BASE_URL}/reservation`, payload, token);
+  await postJsonWithAuth<void>(`${BACKEND_BASE_URL}/ticket`, payload, token);
 }

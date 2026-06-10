@@ -95,7 +95,7 @@ export default function UserDashboard() {
         const token = localStorage.getItem("authToken");
         if (!token) return;
         const res = await fetch(
-          `${BACKEND_URL}/reservation/events/purchased?page=0&pageSize=4`,
+          `${BACKEND_URL}/events/purchased?page=0&pageSize=4`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (res.ok) {

@@ -148,7 +148,7 @@ function MyEventContent() {
         if (!token) throw new Error("Token não encontrado.");
 
         const res = await fetch(
-          `${BACKEND_URL}/reservation/events/${eventId}/tickets?page=${page}&pageSize=6`,
+          `${BACKEND_URL}/ticket/events/${eventId}?page=${page}&pageSize=6`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) throw new Error("Erro ao buscar ingressos.");
