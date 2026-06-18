@@ -5,10 +5,11 @@ services:
     image: postgres:16-alpine
     container_name: arena_postgres
     restart: unless-stopped
+    env_file: .env.db
     environment:
-      POSTGRES_DB: arena
-      POSTGRES_USER: arena
-      POSTGRES_PASSWORD: arena123
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -20,19 +21,18 @@ services:
       retries: 10
 
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: manel07/arena-back:latest
     container_name: arena_backend
     restart: unless-stopped
+    env_file: .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arena
-      SPRING_DATASOURCE_USERNAME: arena
-      SPRING_DATASOURCE_PASSWORD: arena123
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-      APP_UPLOAD_DIR: /app/uploads
-      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
+      SPRING_JPA_DATABASE_PLATFORM: ${SPRING_JPA_DATABASE_PLATFORM}
+      APP_UPLOAD_DIR: ${APP_UPLOAD_DIR}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
     ports:
       - "8080:8080"
     volumes:

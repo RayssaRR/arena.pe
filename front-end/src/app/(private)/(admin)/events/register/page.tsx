@@ -158,7 +158,6 @@ export default function EventForm() {
     if (!formData.startTime) errors.startTime = "Hora de início é obrigatória";
     if (!formData.endTime) errors.endTime = "Hora de término é obrigatória";
     if (!formData.categoryId) errors.categoryId = "Categoria é obrigatória";
-    if (!formData.imageUrl) errors.imageUrl = "Imagem é obrigatória";
     if (selectedSectors.length === 0) {
       errors.sectors = "Selecione pelo menos um setor";
     } else {
