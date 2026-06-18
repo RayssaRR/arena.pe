@@ -16,7 +16,6 @@ public record NewEventForm(
     @NotBlank(message = "Data não pode ficar em branco")
     LocalDateTime eventDate,
 
-    @NotBlank(message = "Url da imagem não pode ficar em branco")
     String imageUrl,
 
     @PositiveOrZero(message = "Id da categoria deve ser um número positivo ou zero")

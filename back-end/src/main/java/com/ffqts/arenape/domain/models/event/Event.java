@@ -38,8 +38,8 @@ public class Event extends BaseEntity {
     @NotNull(message = "Status é obrigatório")
     private EventStatus status;
 
-    @NotBlank(message = "URL da imagem é obrigatória")
-    @Size(min = 5, max = 500, message = "URL da imagem deve ter entre 5 e 500 caracteres")
+    @Nullable
+    @Size(max = 500, message = "URL da imagem deve ter até 500 caracteres")
     @Column(columnDefinition = "VARCHAR(500)")
     private String imageUrl;
 
