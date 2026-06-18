@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: arena_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: arena
+      POSTGRES_USER: arena
+      POSTGRES_PASSWORD: arena123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U arena -d arena"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arena_backend
+    restart: unless-stopped
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/arena
+      SPRING_DATASOURCE_USERNAME: arena
+      SPRING_DATASOURCE_PASSWORD: arena123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      APP_UPLOAD_DIR: /app/uploads
+      SPRING_PROFILES_ACTIVE: prod
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  uploads_data:
