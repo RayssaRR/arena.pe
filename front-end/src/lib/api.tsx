@@ -1,9 +1,5 @@
 import axios from "axios";
 
-export const api = axios.create({
-  baseURL: "http://localhost:",
-});
-
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:8080";
 
 // Classe de erro customizada para melhor tratamento
@@ -19,7 +15,7 @@ function handleAxiosError(error: unknown): never {
   if (axios.isAxiosError(error)) {
     const statusCode = error.response?.status || 500;
     let message = `Erro ${statusCode}`;
-    
+
     if (error.response?.data?.message) {
       message = error.response.data.message;
     } else if (statusCode === 404) {
@@ -31,7 +27,7 @@ function handleAxiosError(error: unknown): never {
     } else if (statusCode >= 500) {
       message = "Erro no servidor";
     }
-    
+
     throw new ApiError(statusCode, message);
   }
   throw error;
@@ -263,9 +259,13 @@ export async function getUserTickets(
 }
 
 export async function cancelTicket(ticketId: string, token: string): Promise<void> {
-  await axios.delete(`${BACKEND_BASE_URL}/ticket/${ticketId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  try {
+    await axios.delete(`${BACKEND_BASE_URL}/ticket/${ticketId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (error) {
+    handleAxiosError(error);
+  }
 }
 
 export async function getTicketById(ticketId: string, token: string): Promise<UserTicketResponse> {
